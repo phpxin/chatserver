@@ -1,1 +1,1 @@
-BOOL chat_parse_config(const char *path);
+gboolean chat_parse_config(const char *path);

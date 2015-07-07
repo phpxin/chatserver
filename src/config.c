@@ -2,7 +2,7 @@
 #include <glib.h>
 #include "config.h"
 
-BOOL chat_parse_config(const char *path)
+gboolean chat_parse_config(const char *path)
 {
 	
 	FILE *fp = fopen(path, "r");

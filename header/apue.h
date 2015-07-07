@@ -14,5 +14,4 @@
 
 #define BUFSIZE 1024
 
-typedef enum{FALSE=0, TRUE=1}BOOL ;
 typedef enum{FAILED=0, SUCC=1, ERR=-1}STATUS ;
