@@ -1,1 +1,1 @@
-BOOL parseConfig(const char *path);
+BOOL chat_parse_config(const char *path);

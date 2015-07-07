@@ -1,0 +1,1 @@
+gboolean chat_config_search_call(gpointer key, gpointer value, gpointer user_data);
