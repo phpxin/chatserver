@@ -3,7 +3,7 @@ all: chatserver
 CC = gcc
 CFLAGS = -g -Wall -ansi
 
-SRCF = ./src/
+SRCF = src/
 OUTPUTF = ./output/
 BINF = ./bin/
 
