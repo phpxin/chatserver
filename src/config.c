@@ -1,4 +1,5 @@
 #include "apue.h"
+#include <glib.h>
 #include "config.h"
 
 BOOL chat_parse_config(const char *path)
@@ -11,11 +12,20 @@ BOOL chat_parse_config(const char *path)
 		return FALSE;
 	}
 	
-	char confItem[BUFSIZE];
+	char conf_item[BUFSIZE];
 	
-	while(fgets(confItem, BUFSIZE, fp) != NULL){
-		printf("%s \n", confItem);
+	gchar **_val;
+	
+	while(fgets(conf_item, BUFSIZE, fp) != NULL){
+		
+		_val = g_strsplit(conf_item, "=", 2);
+		
+		printf("%s is %s \n", _val[0], _val[1]) ;
+		
+		g_strfreev (_val);
 	}
+	
+	_val = NULL;
 	
 	if(ferror(fp)){
 		printf("read config error !!!\n");

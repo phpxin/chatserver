@@ -31,5 +31,10 @@ int main(int argc, char *argv[]){
 		printf("%s \n", (char *)val) ;
 	}
 	
+	
+	
+	/* 程序结束，释放所有堆 */
+	free(config);
+	
 	return 0;
 }
