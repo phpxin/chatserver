@@ -1,0 +1,1 @@
+BOOL parseConfig(const char *path);

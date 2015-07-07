@@ -9,8 +9,8 @@ BINF = bin/
 
 INCLUDE = -I./header
 
-chatserver: ${OUTPUTF}main.o
-	${CC} ${CFLAGS} -o ${BINF}chatserver ${OUTPUTF}main.o
+chatserver: ${OUTPUTF}main.o ${OUTPUTF}config.o
+	${CC} ${CFLAGS} -o ${BINF}chatserver ${OUTPUTF}main.o ${OUTPUTF}config.o
 
 #create all c to o
 ${OUTPUTF}%.o: ${SRCF}%.c
