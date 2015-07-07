@@ -4,8 +4,8 @@ CC = gcc
 CFLAGS = -g -Wall -ansi
 
 SRCF = src/
-OUTPUTF = ./output/
-BINF = ./bin/
+OUTPUTF = output/
+BINF = bin/
 
 chatserver: ${OUTPUTF}main.o
 	${CC} ${CFLAGS} -o ${BINF}chatserver ${OUTPUTF}main.o
