@@ -3,7 +3,8 @@
 
 int main(int argc, char *argv[]){
 	
-	printf("hello world \n");
+	char *a = getpwd();
+	printf("hello world %s \n", a);
 	return 0;
 
 }
