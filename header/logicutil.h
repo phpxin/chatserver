@@ -1,0 +1,1 @@
+void elog(const char * , ...);
