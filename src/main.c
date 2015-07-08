@@ -23,12 +23,16 @@ int main(int argc, char *argv[]){
 		return -1;
 	}
 	
-	gpointer val = g_hash_table_find(config, chat_config_search_call, "db.name");
-	if(val != NULL){
-		printf("%s \n", (char *)val) ;
-	}else{
+	char *_ip = (char *)g_hash_table_find(config, chat_config_search_call, "server.ip");
+	char *_port = (char *)g_hash_table_find(config, chat_config_search_call, "server.port");
+	if(_ip == NULL || _port == NULL){
 		printf("key not found \n");
+		return -1;
 	}
+	
+	unsigned short port = atoi(_port);
+	
+	printf("%s:%us \n", _ip, port);
 	
 	/* 程序结束，释放所有堆 */
 
@@ -38,7 +42,7 @@ int main(int argc, char *argv[]){
 	g_hash_table_iter_init (&iter, config);
 	while (g_hash_table_iter_next (&iter, &key, &value))
   	{
-		printf("%s = %s \n", (char *)key, (char *)value);
+		/* printf("%s = %s \n", (char *)key, (char *)value); */
 		free(key);
 		free(value);
   	}
@@ -48,6 +52,8 @@ int main(int argc, char *argv[]){
 
 	void *test_a = malloc(BUFSIZE);
 	free(test_a);
+	
+	/* 程序结束，释放所有堆 END */
 	
 	return 0;
 }

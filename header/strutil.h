@@ -1,0 +1,1 @@
+int su_trim(char *str);
