@@ -10,13 +10,17 @@ extern int errno ; /* 用于设置错误 */
 
 GHashTable *config = NULL;
 
+static void sig_func(int signum); /* 信号处理 */
+static void free_all(); /* 释放堆内存 */
+
 int main(int argc, char *argv[]){
 
 	if(argc<2){
 		printf("usage: chatserver {config path} \n\n") ;
 		return -1;
 	}
-	
+
+	(void)signal(SIGINT, sig_func) ;
 	
 	if( chat_parse_config(argv[1]) || config == NULL )
 	{
@@ -89,8 +93,25 @@ int main(int argc, char *argv[]){
 
 		close(client_sock_f);
 	}
-
 	
+	return 0;
+}
+
+static void sig_func(int signum)
+{
+	switch(signum)
+	{
+	case SIGINT:
+		free_all();
+		kill(getpid(), SIGKILL);
+		break;
+	default:
+		elog("%d signal not found"); break;
+	}
+}
+
+static void free_all()
+{
 	/* 程序结束，释放所有堆 */
 
 	GHashTableIter iter;
@@ -109,7 +130,5 @@ int main(int argc, char *argv[]){
 	void *test_a = malloc(BUFSIZE);
 	free(test_a);
 	
-	/* 程序结束，释放所有堆 END */
-	
-	return 0;
+	/* 程序结束，释放所有堆 END */	
 }
