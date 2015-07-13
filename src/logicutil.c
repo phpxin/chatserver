@@ -11,3 +11,13 @@ void elog(const char *format , ...)
 	va_end(argp);
 	fprintf(stdout, "\n");
 }
+
+
+void myfree(void *var)
+{
+	if(var!=NULL)
+	{
+		free(var);
+		var = NULL;
+	}
+}
