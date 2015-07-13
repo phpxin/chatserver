@@ -166,7 +166,8 @@ static void free_all()
   	}
 
 	myfree(config);
-
+	
+	/*
 	g_hash_table_iter_init (&iter, clients);
 	while (g_hash_table_iter_next (&iter, &key, &value))
   	{
@@ -175,13 +176,13 @@ static void free_all()
 		
 		elog("%d:%s:%u destory", *((int *)key), _info->ipv4, _info->port);
 		
-		
 		close(_info->fd);
 		
 		myfree(value);
 		
   	}
-	
+	*/
+
 	myfree(clients);
 	/* clients = NULL; */
 	
