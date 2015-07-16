@@ -16,6 +16,12 @@
 
 #define BUFSIZE 1024
 
+/**
+ * 三个值表示的状态应该不同
+ * FAILED 表示失败
+ * SUCC	表示成功
+ * ERR	表示有逻辑错误，应该给客户端返回信息
+ */ 
 typedef enum{FAILED=0, SUCC=1, ERR=-1}STATUS ;
 
 typedef struct {

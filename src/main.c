@@ -6,6 +6,7 @@
 #include <errno.h>
 #include "net.h"
 #include <sys/epoll.h>
+#include "msg.h"
 
 #define MAX_EFDS 1024	/* epoll 最大支持的描述符数量 */
 
@@ -16,11 +17,15 @@ GHashTable *clients = NULL;
 
 static void sig_func(int signum); /* 信号处理 */
 static void free_all(); /* 释放堆内存 */
+static void *thread_func(void *udata); /* 连接线程 */
 
-int ep_servf = -1;
+int ep_servf = -1 , ep_clients_t1= -1 ;
 struct epoll_event *event_ok = NULL;
+struct epoll_event *ce_ok = NULL;
 
 int uid = 1; /* ______  模拟的uid */
+
+pthread_t thread_c1;
 
 int main(int argc, char *argv[]){
 
@@ -28,6 +33,8 @@ int main(int argc, char *argv[]){
 		printf("usage: chatserver {config path} \n\n") ;
 		return -1;
 	}
+
+	int flag = 0;
 
 	(void)signal(SIGINT, sig_func) ;
 	
@@ -38,6 +45,14 @@ int main(int argc, char *argv[]){
 	else
 	{
 		elog("parse config faled ");
+		return -1;
+	}
+
+	flag = pthread_create(&thread_c1, NULL, thread_func, NULL);
+	if(flag != 0)
+	{
+		elog("run child thread failed error num is %d", errno);
+		perror("pthread_create");
 		return -1;
 	}
 	
@@ -58,8 +73,6 @@ int main(int argc, char *argv[]){
 	serv_addr.sin_port = htons(port);
 	inet_pton( AF_INET, _ip, &serv_addr.sin_addr.s_addr);
 	
-	int flag = 0;
-
 	flag = bind(serv_sock_f, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 	if(flag == -1)
 	{
@@ -84,6 +97,7 @@ int main(int argc, char *argv[]){
 	elog("server is running .. wait connecter ...");
 
 	ep_servf = epoll_create(5);
+	ep_clients_t1 = epoll_create(5);
 
 	struct epoll_event _event;
 	_event.data.fd = serv_sock_f;
@@ -125,18 +139,38 @@ int main(int argc, char *argv[]){
 
 			/* 添加到客户端连接表 */
 			g_hash_table_insert(clients, &(client_info->uid), (gpointer)client_info) ;
+
+			/* 添加到客户端epoll */
+			_event.data.fd = client_sock_f;
+    		_event.events = EPOLLIN | EPOLLOUT ;
+			epoll_ctl(ep_clients_t1, EPOLL_CTL_ADD, client_sock_f, &_event);
 		}
 	}
 	
 	return 0;
 }
 
-/*
 static void *thread_func(void *udata)
 {
+
+	ce_ok = (struct epoll_event *)calloc( MAX_EFDS, sizeof(struct epoll_event));
+	int i = 0;
+	while(1)
+	{
+		int isok = epoll_wait(ep_clients_t1, ce_ok, 1, -1) ;
+		for( i=0; i<isok; i++)
+		{
+			if(ce_ok[i].events & EPOLLIN)
+			{
+				msg(ce_ok[i].data.fd);
+			}
+		}
+	}
+
+
+	pthread_exit( NULL );
 }
 
-*/
 
 static void sig_func(int signum)
 {
@@ -155,6 +189,7 @@ static void free_all()
 {
 	/* 程序结束，释放所有堆 */
 
+
 	GHashTableIter iter;
 	gpointer key, value;
 
@@ -165,9 +200,9 @@ static void free_all()
 		myfree(value);
   	}
 
-	myfree(config);
+	/* myfree(config); */
+
 	
-	/*
 	g_hash_table_iter_init (&iter, clients);
 	while (g_hash_table_iter_next (&iter, &key, &value))
   	{
@@ -181,17 +216,21 @@ static void free_all()
 		myfree(value);
 		
   	}
-	*/
 
-	myfree(clients);
-	/* clients = NULL; */
+	/* myfree(clients); */
 	
 	if(ep_servf != -1)
 	{
 		close(ep_servf);
 	}
 
+	if(ep_clients_t1 != -1)
+	{
+		close(ep_clients_t1);
+	}
+
 	myfree(event_ok);
+	myfree(ce_ok);
 	
 	/* 程序结束，释放所有堆 END */	
 }
