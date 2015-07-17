@@ -30,3 +30,10 @@ typedef struct {
 	char ipv4[32];
 	unsigned short port;
 } C_INFO; /* 客户端连接信息 */
+
+/**
+ * 关闭客户端连接，并清除
+ * @param int key 用户数据
+ * @param int flag 查找标识：0/1 ：文件描述符/UID
+ */
+int remove_client(int key, int type);

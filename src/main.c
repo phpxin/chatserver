@@ -38,11 +38,9 @@ int main(int argc, char *argv[]){
 
 	(void)signal(SIGINT, sig_func) ;
 	
-	if( chat_parse_config(argv[1]) || config == NULL )
-	{
-		elog("parse config ok ");
-	}
-	else
+	chat_parse_config(argv[1]);
+
+	if( config == NULL )
 	{
 		elog("parse config faled ");
 		return -1;
@@ -52,14 +50,13 @@ int main(int argc, char *argv[]){
 	if(flag != 0)
 	{
 		elog("run child thread failed error num is %d", errno);
-		perror("pthread_create");
 		return -1;
 	}
 	
 	char *_ip = (char *)g_hash_table_find(config, chat_config_search_call, "server.ip");
 	char *_port = (char *)g_hash_table_find(config, chat_config_search_call, "server.port");
 	if(_ip == NULL || _port == NULL){
-		elog("key not found ");
+		elog("key [server_ip/server_port] not found from config");
 		return -1;
 	}
 	
@@ -77,7 +74,6 @@ int main(int argc, char *argv[]){
 	if(flag == -1)
 	{
 		elog("bind address failed error num is %d", errno);
-		perror("bind");
 		return -1;
 	}
 
@@ -85,7 +81,6 @@ int main(int argc, char *argv[]){
 	if(flag == -1)
 	{
 		elog("listen failed error num is %d", errno);
-		perror("bind");
 		return -1;
 	}
 
@@ -106,7 +101,6 @@ int main(int argc, char *argv[]){
 	flag = epoll_ctl(ep_servf, EPOLL_CTL_ADD, serv_sock_f, &_event);
     if (flag == -1) {
 		elog("epoll_ctl failed error num is %d", errno);
-        perror("epoll_ctl");
         return -1;
     }
 
@@ -123,7 +117,7 @@ int main(int argc, char *argv[]){
 			client_sock_f = accept(serv_sock_f, (struct sockaddr *)&client_addr, &client_sock_l);
 			if(client_sock_f == -1)
 			{
-				elog("client socket broken");
+				elog("accept failed error num is %d", errno);
 				continue;
 			}
 
@@ -183,6 +177,50 @@ static void sig_func(int signum)
 	default:
 		elog("%d signal not found"); break;
 	}
+}
+
+int remove_client(int key, int type)
+{
+
+	C_INFO *_cinfo = NULL;
+	int flag = 0 , ret = 0;
+
+	if(type == 1)
+	{
+		_cinfo = (C_INFO *)g_hash_table_find(clients, chat_cinfo_search_call, &key);
+	}
+	else
+	{
+		_cinfo = (C_INFO *)g_hash_table_find(clients, chat_cinfo_search_withfd, &key);
+	}
+
+	if(_cinfo == NULL)
+	{
+		elog("client not found on main.c remove_client ");
+		return 0;
+	}
+
+
+	flag = epoll_ctl(ep_clients_t1, EPOLL_CTL_DEL, _cinfo->fd, NULL);
+
+	if(flag == -1)
+	{
+		elog("epoll_ctl failed error num is %d", errno);
+		perror("epoll_ctl");
+		ret = 0;
+	}
+	else
+	{
+		close(_cinfo->fd);
+		elog("close fd ok !");
+		ret = 1;
+	}
+
+	g_hash_table_remove(clients, &_cinfo->uid);
+
+	myfree(_cinfo);
+
+	return ret;
 }
 
 static void free_all()

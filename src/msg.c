@@ -17,7 +17,7 @@ int msg(int fd)
 		return 0;
 	}
 
-	printf("recv pkg %ld : %s \n", buf_len, (char *)buf);
+	printf("recv msg %ld : %s \n", buf_len, (char *)buf);
 
 	char *_testmsg = "hello world !\n";
 	msg_write(fd, (void *)_testmsg, strlen(_testmsg));
@@ -36,14 +36,15 @@ int msg_read(int fd, void **pkg, size_t *pkg_len)
 
 	if(recv_len == 0)
 	{
-		elog("client was closed");
+		remove_client(fd, 0);
+		elog("client %d was closed", fd);
 		return 0;
 	}
 
 	if(recv_len < 0)
 	{
+		remove_client(fd, 0);
 		elog("recv failed error num is %d", errno);
-		perror("recv");
 		return 0;
 	}
 

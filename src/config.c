@@ -12,7 +12,7 @@ gboolean chat_parse_config(const char *path)
 	FILE *fp = fopen(path, "r");
 	
 	if(fp == NULL){
-		elog("open file failed !!!");
+		elog("open config file %s failed !!!", path);
 		return FALSE;
 	}
 	config = g_hash_table_new (g_str_hash, g_str_equal);
@@ -35,7 +35,7 @@ gboolean chat_parse_config(const char *path)
 	_val = NULL;
 	
 	if(ferror(fp)){
-		elog("read config error !!!");
+		elog("read config %s error !!!", path);
 		return FALSE;
 	}
 	
