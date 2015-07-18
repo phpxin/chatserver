@@ -181,7 +181,6 @@ static void sig_func(int signum)
 
 int remove_client(int key, int type)
 {
-
 	C_INFO *_cinfo = NULL;
 	int flag = 0 , ret = 0;
 
@@ -269,6 +268,9 @@ static void free_all()
 
 	myfree(event_ok);
 	myfree(ce_ok);
+
+
+	elog("free alloc done !");
 	
 	/* 程序结束，释放所有堆 END */	
 }
