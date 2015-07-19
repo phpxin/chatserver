@@ -8,6 +8,7 @@
 #include <sys/epoll.h>
 #include "msg.h"
 
+#define MAX_CLIENT 512	/* 最大客户端连接数 */
 #define MAX_EFDS 1024	/* epoll 最大支持的描述符数量 */
 
 extern int errno ;
@@ -107,12 +108,20 @@ int main(int argc, char *argv[]){
 	event_ok = (struct epoll_event *)calloc( 1, sizeof(struct epoll_event));
 	C_INFO *client_info = NULL;
 	clients = g_hash_table_new(g_direct_hash, g_int_equal);
+	size_t client_len = 0;
 
 	while(1)
 	{
         int isok=epoll_wait(ep_servf, event_ok, 1, -1) ;
         if(isok>0 && event_ok[0].data.fd == serv_sock_f)
         {
+			client_len = g_hash_table_size(clients);
+			if(client_len >= MAX_CLIENT)
+			{
+				elog("client pool is full max client is %d , now %d", MAX_CLIENT, client_len);
+				/* 应该通知客户端，服务器链接已满，需要排队 */
+				continue;
+			}
 
 			client_sock_f = accept(serv_sock_f, (struct sockaddr *)&client_addr, &client_sock_l);
 			if(client_sock_f == -1)
