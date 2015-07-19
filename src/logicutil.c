@@ -12,6 +12,53 @@ void elog(const char *format , ...)
 	fprintf(stdout, "\n");
 }
 
+//主机字节序大小端判断
+int blOrll(){
+     union{
+          short value ;
+          char union_bytes[sizeof(short)] ;
+     } test;
+
+     test.value = 0x0102;
+
+     if( (test.union_bytes[0]==1) && (test.union_bytes[1]==2) ){
+
+    	 return 1; //big
+     }
+
+     else if( (test.union_bytes[1]==1) && (test.union_bytes[0]==2) ){
+
+    	 return 2; //little
+     }
+
+     return 0; //unknown
+}
+
+//int转换成网络字节序
+int int_to_net(int value){
+	if(blOrll()==1){
+		return value;
+	}
+
+	return big_litle_endian(value);
+}
+
+//网络字节序转换int
+int net_to_int(int value){
+	if(blOrll()==1){
+		return value;
+	}
+
+	return big_litle_endian(value);
+}
+
+//大小端相互转换
+int big_litle_endian(int x)
+{
+    int tmp;
+    tmp = (((x)&0xff)<<24) + (((x>>8)&0xff)<<16) + (((x>>16)&0xff)<<8) + (((x>>24)&0xff));
+    return tmp;
+}
 
 void myfree(void *var)
 {
