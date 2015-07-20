@@ -28,27 +28,53 @@ int msg(int fd)
 
 int msg_read(int fd, void **pkg, size_t *pkg_len)
 {
-	int _len = 1024;
-	*pkg = malloc(_len);
-	memset(*pkg, '\0', _len);
+	
+	int readlen = 0 , _rlen = 0;
+	int _lenl = BUFSIZE;
+	_lenl = 10;
+	*pkg = malloc(_lenl);
+	memset(*pkg, '\0', _lenl);
 
-	int recv_len = recv(fd, *pkg, _len, 0);
+	int runflag = 1 , package_len = 0;
 
-	if(recv_len == 0)
+	while( runflag ){
+
+		_rlen = recv(fd, *pkg+readlen, _lenl, 0);
+		readlen += _rlen;
+
+		/* 当收到 _LENL 整数倍个数据，会出问题 */
+
+		if(!package_len){
+			memcpy(&package_len, *pkg, sizeof(int));
+			printf("package len is %d \n", package_len);
+		}
+
+		if(_rlen >= _lenl && readlen != package_len){
+			printf("read of end \n");
+			*pkg = realloc(*pkg, readlen+_lenl);
+			memset(*pkg+readlen, '\0', _lenl);
+			runflag = 1;
+		}else{
+			runflag = 0;
+		}
+	}
+
+	if(readlen == 0)
 	{
 		remove_client(fd, 0);
 		elog("client %d was closed", fd);
 		return 0;
 	}
 
-	if(recv_len < 0)
+	if(readlen < 0)
 	{
 		remove_client(fd, 0);
 		elog("recv failed error num is %d", errno);
 		return 0;
 	}
 
-	*pkg_len = recv_len;
+	memcpy(*pkg, *pkg+sizeof(int), readlen-sizeof(int));
+	*pkg_len = readlen - sizeof(int);
 	return 1;
 }
 
