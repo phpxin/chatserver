@@ -12,7 +12,7 @@ void myfree(void *var);
 /**
  * 主机字节序大小端判断
  */
-int blOrll();
+int bl_or_ll();
 
 /**
  * int转换成网络字节序
@@ -25,6 +25,6 @@ int int_to_net(int value);
 int net_to_int(int value);
 
 /**
- * 大小端相互转换
+ * int大小端相互转换
  */
-int big_litle_endian(int x);
+int int_bl_endian(int x);

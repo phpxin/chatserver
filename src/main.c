@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
 	
     struct sockaddr_in serv_addr;
 	int serv_sock_f = socket(AF_INET, SOCK_STREAM, 0);
-	ioctl(serv_sock_f, FIONBIO, 1);
+	/* ioctl(serv_sock_f, FIONBIO, 1); */
 
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(port);

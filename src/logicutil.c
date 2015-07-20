@@ -12,7 +12,7 @@ void elog(const char *format , ...)
 	fprintf(stdout, "\n");
 }
 
-int blOrll(){
+int bl_or_ll(){
      union{
           short value ;
           char union_bytes[sizeof(short)] ;
@@ -34,22 +34,22 @@ int blOrll(){
 }
 
 int int_to_net(int value){
-	if(blOrll()==1){
+	if(bl_or_ll()==1){
 		return value;
 	}
 
-	return big_litle_endian(value);
+	return int_bl_endian(value);
 }
 
 int net_to_int(int value){
-	if(blOrll()==1){
+	if(bl_or_ll()==1){
 		return value;
 	}
 
-	return big_litle_endian(value);
+	return int_bl_endian(value);
 }
 
-int big_litle_endian(int x)
+int int_bl_endian(int x)
 {
     int tmp;
     tmp = (((x)&0xff)<<24) + (((x>>8)&0xff)<<16) + (((x>>16)&0xff)<<8) + (((x>>24)&0xff));
