@@ -12,7 +12,6 @@ void elog(const char *format , ...)
 	fprintf(stdout, "\n");
 }
 
-//主机字节序大小端判断
 int blOrll(){
      union{
           short value ;
@@ -23,18 +22,17 @@ int blOrll(){
 
      if( (test.union_bytes[0]==1) && (test.union_bytes[1]==2) ){
 
-    	 return 1; //big
+    	 return 1; /* big */
      }
 
      else if( (test.union_bytes[1]==1) && (test.union_bytes[0]==2) ){
 
-    	 return 2; //little
+    	 return 2; /* little */
      }
 
-     return 0; //unknown
+     return 0;
 }
 
-//int转换成网络字节序
 int int_to_net(int value){
 	if(blOrll()==1){
 		return value;
@@ -43,7 +41,6 @@ int int_to_net(int value){
 	return big_litle_endian(value);
 }
 
-//网络字节序转换int
 int net_to_int(int value){
 	if(blOrll()==1){
 		return value;
@@ -52,7 +49,6 @@ int net_to_int(int value){
 	return big_litle_endian(value);
 }
 
-//大小端相互转换
 int big_litle_endian(int x)
 {
     int tmp;

@@ -7,6 +7,7 @@
 #include "net.h"
 #include <sys/epoll.h>
 #include "msg.h"
+#include "dba.h"
 
 #define MAX_CLIENT 512	/* 最大客户端连接数 */
 #define MAX_EFDS 1024	/* epoll 最大支持的描述符数量 */
@@ -32,7 +33,7 @@ int main(int argc, char *argv[]){
 
 	if(argc<2){
 		printf("usage: chatserver {config path} \n\n") ;
-		return -1;
+		exit( -1 );
 	}
 
 	int flag = 0;
@@ -44,21 +45,21 @@ int main(int argc, char *argv[]){
 	if( config == NULL )
 	{
 		elog("parse config faled ");
-		return -1;
+		exit( -1 );
 	}
 
 	flag = pthread_create(&thread_c1, NULL, thread_func, NULL);
 	if(flag != 0)
 	{
 		elog("run child thread failed error num is %d", errno);
-		return -1;
+		exit( -1 );
 	}
 	
-	char *_ip = (char *)g_hash_table_find(config, chat_config_search_call, "server.ip");
-	char *_port = (char *)g_hash_table_find(config, chat_config_search_call, "server.port");
+	char *_ip = chat_get_config("server.ip");
+	char *_port = chat_get_config("server.port");
 	if(_ip == NULL || _port == NULL){
 		elog("key [server_ip/server_port] not found from config");
-		return -1;
+		exit( -1 );
 	}
 	
 	unsigned short port = atoi(_port);
@@ -75,14 +76,14 @@ int main(int argc, char *argv[]){
 	if(flag == -1)
 	{
 		elog("bind address failed error num is %d", errno);
-		return -1;
+		exit( -1 );
 	}
 
 	flag = listen(serv_sock_f, 5);
 	if(flag == -1)
 	{
 		elog("listen failed error num is %d", errno);
-		return -1;
+		exit( -1 );
 	}
 
 	
@@ -102,13 +103,20 @@ int main(int argc, char *argv[]){
 	flag = epoll_ctl(ep_servf, EPOLL_CTL_ADD, serv_sock_f, &_event);
     if (flag == -1) {
 		elog("epoll_ctl failed error num is %d", errno);
-        return -1;
+        exit( -1 );
     }
 
 	event_ok = (struct epoll_event *)calloc( 1, sizeof(struct epoll_event));
 	C_INFO *client_info = NULL;
 	clients = g_hash_table_new(g_direct_hash, g_int_equal);
 	size_t client_len = 0;
+
+	flag = init_db();
+	if(!flag)
+	{
+		elog("init database failed !");
+		exit( -1 );
+	}
 
 	while(1)
 	{
@@ -150,7 +158,7 @@ int main(int argc, char *argv[]){
 		}
 	}
 	
-	return 0;
+	exit( EXIT_SUCCESS );
 }
 
 static void *thread_func(void *udata)
@@ -181,7 +189,7 @@ static void sig_func(int signum)
 	{
 	case SIGINT:
 		free_all();
-		kill(getpid(), SIGKILL);
+		kill((pid_t)getpid(), (int)SIGKILL);
 		break;
 	default:
 		elog("%d signal not found"); break;
@@ -277,7 +285,8 @@ static void free_all()
 
 	myfree(event_ok);
 	myfree(ce_ok);
-
+	
+	close_db();
 
 	elog("free alloc done !");
 	

@@ -3,8 +3,15 @@
 #include "config.h"
 #include "strutil.h"
 #include "logicutil.h"
+#include "hashutil.h"
 
 extern GHashTable *config;
+
+char* chat_get_config(char *name)
+{
+	char *value = (char *)g_hash_table_find(config, chat_config_search_call, name);
+	return value;
+}
 
 gboolean chat_parse_config(const char *path)
 {

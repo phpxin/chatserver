@@ -1,20 +1,3 @@
-/*
- * dba.h
- *
- *  Created on: 2015年1月3日
- *      Author: lixin
- */
-
-#ifndef DBA_H_
-#define DBA_H_
-
-#include </usr/local/mysql/include/mysql.h>
-
-
-typedef enum {
-    false = 0,
-    true = 1
-} bool;
 
 struct user{
 	int id;
@@ -31,12 +14,53 @@ struct message{
 	short type;
 };
 
-bool init_db();
-bool addUser(struct user *u);
-int getUserForLogin(const char *account, const char *pwd, struct user *_u);
-int getUserById(int id, struct user *_u);
-int insertMessage(struct message *msg);
+/*
+ * 连接数据库
+ * @return int 0/1 失败/成功
+ */
+int init_db();
 
-MYSQL *mysql;
+/*
+ * 关闭数据库
+ * @return int 0/1 失败/成功
+ */
+int close_db();
 
-#endif /* DBA_H_ */
+/*
+ * 添加用户
+ * @return int 0/1 失败/成功
+ */
+int add_user(struct user *u);
+
+/**
+ * 登录用户获取信息
+ * @param const char *account 用户账号
+ * @param const char *pwd 用户密码
+ * @param struct user *_u 返回值指针
+ *
+ * @return struct user 用户结构
+ * -1 登录账号错误
+ * -2 密码错误
+ * -3 数据库错误
+ * 0 成功（将返回指针设为查到的用户）
+ * 获取登录用户信息
+ */
+int get_user_for_login(const char *account, const char *pwd, struct user *_u);
+
+/**
+ * 通过id获取用户信息
+ *
+ * @param int id 用户id
+ * @param struct user *_u 返回值指针
+ *
+ * @return -3 数据库错误 -2 未找到 0 成功
+ *
+ */
+int get_user_by_id(int id, struct user *_u);
+
+/**
+ * 插入聊天数据
+ * @param struct message *msg 消息正文结构体
+ * @return -3 数据库错误；0 插入0条；返回插入条数
+ */
+int insert_message(struct message *msg);
