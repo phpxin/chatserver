@@ -8,7 +8,7 @@ extern int errno ;
 
 int msg(int fd)
 {
-	void *buf = NULL;
+	void *buf = NULL; /* data package */
 	size_t buf_len = 0;
 	msg_read(fd, &buf, &buf_len);
 
@@ -17,13 +17,32 @@ int msg(int fd)
 		return 0;
 	}
 
-	printf("recv msg %ld : %s \n", buf_len, (char *)buf);
+	/* printf("recv msg %ld : %s \n", buf_len, (char *)buf); */
+
+	unsigned short protocol;
+	size_t protocol_l = sizeof(unsigned short);
+	memcpy(&protocol, buf, protocol_l);
+
+	protocol_stat_machine(protocol, buf+protocol, buf_len-protocol);
 
 	char *_testmsg = "hello world !\n";
 	msg_write(fd, (void *)_testmsg, strlen(_testmsg));
 
 	myfree(buf);
 	return 1;
+}
+
+void protocol_stat_machine(unsigned short protocol, const void *pkg, size_t pkg_len)
+{
+	switch(protocol)
+	{
+		case PTO_LOGIN:
+			break;
+		case PTO_MSG:
+			break;
+		default:
+			break;
+	}
 }
 
 int msg_read(int fd, void **pkg, size_t *pkg_len)
