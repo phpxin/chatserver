@@ -163,7 +163,7 @@ int main(int argc, char *argv[]){
 
 static void *thread_func(void *udata)
 {
-
+	/* 扩展多线程注意：这里应该是每个线程管理不同的epoll，避免并发加锁造成拥塞，影响程序效率 */
 	ce_ok = (struct epoll_event *)calloc( MAX_EFDS, sizeof(struct epoll_event));
 	int i = 0;
 	while(1)

@@ -13,8 +13,8 @@ BINF = bin/
 INCLUDE = -I${MYSQLDIR}include -I${GLIBDIR}include/glib-2.0 -I${GLIBDIR}include/glib-2.0/glib -I${GLIBDIR}lib/glib-2.0/include -I./header
 CLIB = -L${MYSQLDIR}lib -L${GLIBDIR}lib -lglib-2.0 -lmysqlclient -lpthread
 
-chatserver: ${OUTPUTF}main.o ${OUTPUTF}config.o ${OUTPUTF}hashutil.o ${OUTPUTF}strutil.o ${OUTPUTF}logicutil.o ${OUTPUTF}msg.o ${OUTPUTF}dba.o
-	${CC} ${CFLAGS} -o ${BINF}chatserver ${OUTPUTF}main.o ${OUTPUTF}config.o ${OUTPUTF}hashutil.o ${OUTPUTF}strutil.o ${OUTPUTF}logicutil.o ${OUTPUTF}msg.o ${OUTPUTF}dba.o ${CLIB}
+chatserver: ${OUTPUTF}main.o ${OUTPUTF}config.o ${OUTPUTF}hashutil.o ${OUTPUTF}strutil.o ${OUTPUTF}logicutil.o ${OUTPUTF}msg.o ${OUTPUTF}dba.o ${OUTPUTF}action.o
+	${CC} ${CFLAGS} -o ${BINF}chatserver ${OUTPUTF}main.o ${OUTPUTF}config.o ${OUTPUTF}hashutil.o ${OUTPUTF}strutil.o ${OUTPUTF}logicutil.o ${OUTPUTF}msg.o ${OUTPUTF}dba.o ${OUTPUTF}action.o ${CLIB}
 
 #create all c to o
 ${OUTPUTF}%.o: ${SRCF}%.c

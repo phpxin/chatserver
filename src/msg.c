@@ -3,6 +3,7 @@
 #include "msg.h"
 #include "logicutil.h"
 #include <errno.h>
+#include "action.h"
 
 extern int errno ;
 
@@ -23,7 +24,7 @@ int msg(int fd)
 	size_t protocol_l = sizeof(unsigned short);
 	memcpy(&protocol, buf, protocol_l);
 
-	protocol_stat_machine(protocol, buf+protocol, buf_len-protocol);
+	protocol_stat_machine(protocol, buf+protocol_l, buf_len-protocol_l);
 
 	char *_testmsg = "hello world !\n";
 	msg_write(fd, (void *)_testmsg, strlen(_testmsg));
@@ -34,11 +35,14 @@ int msg(int fd)
 
 void protocol_stat_machine(unsigned short protocol, const void *pkg, size_t pkg_len)
 {
+	STATUS status;
 	switch(protocol)
 	{
 		case PTO_LOGIN:
+			status = act_user_login(pkg, pkg_len);
 			break;
 		case PTO_MSG:
+			status = act_user_message(pkg, pkg_len);
 			break;
 		default:
 			break;
@@ -68,8 +72,7 @@ int msg_read(int fd, void **pkg, size_t *pkg_len)
 			printf("package len is %d \n", package_len);
 		}
 
-		if(_rlen >= _lenl && readlen != package_len){
-			printf("read of end \n");
+		if(_rlen >= _lenl && readlen < package_len){
 			*pkg = realloc(*pkg, readlen+_lenl);
 			memset(*pkg+readlen, '\0', _lenl);
 			runflag = 1;
