@@ -1,4 +1,4 @@
-
+/* define data structs */
 struct user{
 	int id;
 	char account[200];
@@ -26,12 +26,6 @@ int init_db();
  */
 int close_db();
 
-/*
- * 添加用户
- * @return int 0/1 失败/成功
- */
-int add_user(struct user *u);
-
 /**
  * 登录用户获取信息
  * @param const char *account 用户账号
@@ -45,7 +39,7 @@ int add_user(struct user *u);
  * 0 成功（将返回指针设为查到的用户）
  * 获取登录用户信息
  */
-int get_user_for_login(const char *account, const char *pwd, struct user *_u);
+int get_users(const char *where, struct user **users, size_t *ucount);
 
 /**
  * 通过id获取用户信息
@@ -56,7 +50,7 @@ int get_user_for_login(const char *account, const char *pwd, struct user *_u);
  * @return -3 数据库错误 -2 未找到 0 成功
  *
  */
-int get_user_by_id(int id, struct user *_u);
+int get_user(int id, struct user *_u);
 
 /**
  * 插入聊天数据

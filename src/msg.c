@@ -4,6 +4,7 @@
 #include "logicutil.h"
 #include <errno.h>
 #include "action.h"
+#include "protocol.h"
 
 extern int errno ;
 
@@ -18,11 +19,10 @@ int msg(int fd)
 		return 0;
 	}
 
-	/* printf("recv msg %ld : %s \n", buf_len, (char *)buf); */
-
 	unsigned short protocol;
 	size_t protocol_l = sizeof(unsigned short);
 	memcpy(&protocol, buf, protocol_l);
+	protocol = ntohs(protocol);
 
 	protocol_stat_machine(protocol, buf+protocol_l, buf_len-protocol_l);
 
@@ -59,16 +59,16 @@ int msg_read(int fd, void **pkg, size_t *pkg_len)
 	memset(*pkg, '\0', _lenl);
 
 	int runflag = 1 , package_len = 0;
+	int pkg_ll = sizeof(int); /* size of package_len */
 
 	while( runflag ){
 
 		_rlen = recv(fd, *pkg+readlen, _lenl, 0);
 		readlen += _rlen;
 
-		/* 当收到 _LENL 整数倍个数据，会出问题 */
-
 		if(!package_len){
-			memcpy(&package_len, *pkg, sizeof(int));
+			memcpy(&package_len, *pkg, pkg_ll);
+			package_len = net_to_int(package_len);
 			printf("package len is %d \n", package_len);
 		}
 
@@ -95,8 +95,9 @@ int msg_read(int fd, void **pkg, size_t *pkg_len)
 		return 0;
 	}
 
-	memcpy(*pkg, *pkg+sizeof(int), readlen-sizeof(int));
-	*pkg_len = readlen - sizeof(int);
+	*pkg_len = readlen - pkg_ll;
+	memcpy(*pkg, *pkg+pkg_ll, *pkg_len);
+	
 	return 1;
 }
 

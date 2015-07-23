@@ -11,6 +11,7 @@ void myfree(void *var);
 
 /**
  * 主机字节序大小端判断
+ * @return 0/1/2 未知/大端/小端
  */
 int bl_or_ll();
 

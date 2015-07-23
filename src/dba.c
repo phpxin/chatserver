@@ -76,7 +76,7 @@ int insert_message(struct message *msg)
 
 }
 
-int get_user_by_id(int id, struct user *_u)
+int get_user(int id, struct user *_u)
 {
 	if(mysql == NULL){
 		return -3;
@@ -115,16 +115,16 @@ int get_user_by_id(int id, struct user *_u)
 	return 1;
 }
 
-int get_user_for_login(const char *account, const char *pwd, struct user *_u){
+int get_users(const char *where, struct user **users, size_t *ucount){
 	if(mysql == NULL){
 		return -3;
 	}
 
-	size_t _t = 200;
+	size_t _t = 200 + strlen(where);
 
 	char sql[_t];
 
-	sprintf(sql, "select * from user where account='%s'", account);
+	sprintf(sql, "select * from user %s", where);
 
 	int flag = mysql_query(mysql, sql);
 
@@ -143,51 +143,28 @@ int get_user_for_login(const char *account, const char *pwd, struct user *_u){
     if(item_count<=0){
     	return -1;
     }
-
+	
+	size_t user_il = sizeof(struct user);
+	*users = (struct user *)malloc(item_count*user_il);
+	
+	struct user _u;
     MYSQL_ROW row;
+	int i=0;
 
-	row = mysql_fetch_row(result);
+	while((row = mysql_fetch_row(result))){
 
-	_u->id = atoi(row[0]);
-	strncpy(_u->account, row[1], sizeof(_u->account));
-	strncpy(_u->pwd, row[2], sizeof(_u->pwd));
-	strncpy(_u->name, row[3], sizeof(_u->name));
+		memset(&_u, '\0', user_il);
+	
+		_u.id = atoi(row[0]);
+		strncpy(_u.account, row[1], sizeof(_u.account)-1);
+		strncpy(_u.pwd, row[2], sizeof(_u.pwd)-1);
+		strncpy(_u.name, row[3], sizeof(_u.name)-1);
+		
+		memcpy((*users)+i, &_u, user_il);
 
-	if(strcmp(_u->pwd,pwd)!=0){
-		return -2;
+		i++;
 	}
+	*ucount = i;
 
 	return 0;
-
 }
-
-int add_user(struct user *u)
-{
-
-	if(mysql == NULL){
-		return 0;
-	}
-
-	size_t _t = sizeof(struct user)+200;
-
-	char sql[_t];
-
-	sprintf(sql, "insert into user(account,pwd,name) values('%s','%s','%s')", u->account, u->pwd, u->name) ;
-
-	printf("sql is %s \n", sql);
-
-	int flag = mysql_query(mysql, sql);
-
-	if(flag>0){
-		return 0;
-	}
-
-	my_ulonglong _c = mysql_affected_rows(mysql);
-
-	if(_c<=0){
-		return 0;
-	}
-
-	return 1;
-}
-

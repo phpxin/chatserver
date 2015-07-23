@@ -1,19 +1,26 @@
 #include "apue.h"
+#include "logicutil.h"
 #include "chat_exception.h"
 
-int exception_no = 0;
-
-void p_chat_exception(const char *msg)
+void p_chat_exception(int _eno)
 {
 	char *emsg = NULL;
-	switch(exception_no)
+	switch(_eno)
 	{
 		case CE_PARAM : emsg = "wrong param" ; break;
 		case CE_BAD_DATA : emsg = "data package bad" ; break;
 		case CE_VERIFY : emsg = "verify failed" ; break;
+		
+		case DBE_NOINSTANCE : emsg = "db instance not exist" ; break;
+		
 		default : emsg = "none exception" ; break;
 	}
 
-	printf("%s : %s \n", msg, emsg);
+	printf("%s\n", emsg);
 }
 
+void set_chat_exception(int _eno)
+{
+	/* do somethine , example send sms to admin */
+	elog("catch exception , number is %d", _eno);
+}

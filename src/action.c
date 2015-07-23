@@ -1,6 +1,9 @@
 #include "apue.h"
 #include "dba.h"
 #include "action.h"
+#include "protocol.h"
+#include "strutil.h"
+#include "logicutil.h"
 
 STATUS act_user_login(const void *pkg, size_t pkg_len)
 {
@@ -18,7 +21,38 @@ STATUS act_user_login(const void *pkg, size_t pkg_len)
 
 	printf("account is %s, pwd is %s \n", account, pwd);
 
-	return SUCC;
+	su_trim(account, "\r\n ");
+	su_trim(pwd, "\r\n ");
+
+	char *format = "where account='%s'\0";
+	size_t wlen = strlen(format) + strlen(account) + 2;
+
+	char where[wlen];
+	sprintf(where, format, account) ;
+
+	struct user *users = NULL;
+	size_t ucount = 0;
+	
+	int flag = get_users(where, &users, &ucount);
+
+	STATUS ret = SUCC;
+
+	if(flag<0){
+		elog("user login failed return %d", flag);
+		ret = FAILED;
+	}else{
+		int i;
+		struct user _u;
+		size_t user_il = sizeof(struct user);
+		for( i=0; i<ucount; i++){
+			memcpy(&_u, users+i, user_il);
+			printf("account is %s, pwd is %s, name is %s \n", _u.account, _u.pwd, _u.name);
+		}
+	}
+
+	myfree(users);
+
+	return ret;
 }
 
 STATUS act_user_message(const void *pkg, size_t pkg_len)
