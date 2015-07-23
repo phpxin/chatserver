@@ -160,7 +160,7 @@ int get_users(const char *where, struct user **users, size_t *ucount){
 		strncpy(_u.pwd, row[2], sizeof(_u.pwd)-1);
 		strncpy(_u.name, row[3], sizeof(_u.name)-1);
 		
-		memcpy((*users)+i, &_u, user_il);
+		memcpy(*users+i, &_u, user_il);
 
 		i++;
 	}
