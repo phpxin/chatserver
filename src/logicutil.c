@@ -2,7 +2,7 @@
 #include "stdarg.h"
 #include "logicutil.h"
 
-void elog(const char *format , ...)
+void elog(int level, const char *format , ...)
 {
 	va_list argp;
 	fprintf(stdout, "dump:");

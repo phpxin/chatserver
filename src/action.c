@@ -5,10 +5,12 @@
 #include "strutil.h"
 #include "logicutil.h"
 
-STATUS act_user_login(const void *pkg, size_t pkg_len)
+RET act_user_login(const void *pkg, size_t pkg_len)
 {
 	char account[200] = {'\0'} ;
 	char pwd[200] = {'\0'} ;
+
+	RET ret={SUCC, ""};
 
 	size_t shift = 0, cplen = 0;
 	
@@ -35,11 +37,10 @@ STATUS act_user_login(const void *pkg, size_t pkg_len)
 	
 	int flag = get_users(where, &users, &ucount);
 
-	STATUS ret = SUCC;
-
 	if(flag<0){
 		elog("user login failed return %d", flag);
-		ret = FAILED;
+		ret.status = ERR;
+		ret.tip = "user account not exist";
 	}else{
 		int i;
 		struct user _u;

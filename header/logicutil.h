@@ -1,3 +1,6 @@
+#define E_NOTICE 1
+#define E_WARNNING 1<<1
+
 
 /**
  * 记录/显示日志

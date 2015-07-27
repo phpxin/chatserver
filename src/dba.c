@@ -48,10 +48,30 @@ int init_db()
     return 1;
 }
 
+int sql_query(MYSQL *mysql, const char *stmt_str)
+{
+	int _errno = mysql_query(mysql, sql);
+	if(_errno>0)
+	{
+		elog("mysql: statement syntax error: errno %d", _errno);
+	}
+	return _errno;
+}
+
+int instance_exist()
+{
+	if(mysql == NULL)
+	{
+		elog("mysql: instance not exist");
+		return 0;
+	}
+	return 1;
+}
+
 int insert_message(struct message *msg)
 {
 	if(mysql == NULL){
-		return -3;
+		return DBE_NOINSTANCE;
 	}
 
 	size_t _t = sizeof(struct message)+200;
@@ -67,7 +87,7 @@ int insert_message(struct message *msg)
 	int flag = mysql_query(mysql, sql);
 
 	if(flag>0){
-		return -3;
+		return DBE_STATEMENT;
 	}
 
 	my_ulonglong count = mysql_affected_rows(mysql);
@@ -79,7 +99,7 @@ int insert_message(struct message *msg)
 int get_user(int id, struct user *_u)
 {
 	if(mysql == NULL){
-		return -3;
+		return -1;
 	}
 
 	size_t _t = 200;
@@ -90,7 +110,7 @@ int get_user(int id, struct user *_u)
 	int flag = mysql_query(mysql, sql);
 
 	if(flag>0){
-		return -3;
+		return -2;
 	}
 
 	MYSQL_RES *result = mysql_store_result(mysql);
