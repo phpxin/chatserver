@@ -19,8 +19,8 @@ void p_chat_exception(int _eno)
 	printf("%s\n", emsg);
 }
 
-void set_chat_exception(int _eno)
+void set_chat_exception(int level, int _eno)
 {
 	/* do somethine , example send sms to admin */
-	elog("catch exception , number is %d", _eno);
+	elog(level, "catch exception , number is %d", _eno);
 }

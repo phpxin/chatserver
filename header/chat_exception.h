@@ -8,6 +8,7 @@
 
 #define DBE_NOINSTANCE	-20000		/* mysql no instance mysql is null */
 #define DBE_STATEMENT	-20001		/* statement syntax error */
+#define DBE_RESULT		-20002		/* store result error */
 
 void p_chat_exception(int _eno);
-void set_chat_exception(int _eno);
+void set_chat_exception(int level, int _eno);

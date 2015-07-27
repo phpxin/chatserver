@@ -38,7 +38,7 @@ RET act_user_login(const void *pkg, size_t pkg_len)
 	int flag = get_users(where, &users, &ucount);
 
 	if(flag<0){
-		elog("user login failed return %d", flag);
+		elog(E_NOTICE, "user login failed return %d", flag);
 		ret.status = ERR;
 		ret.tip = "user account not exist";
 	}else{
@@ -56,7 +56,8 @@ RET act_user_login(const void *pkg, size_t pkg_len)
 	return ret;
 }
 
-STATUS act_user_message(const void *pkg, size_t pkg_len)
+RET act_user_message(const void *pkg, size_t pkg_len)
 {
-	return SUCC;
+	RET ret = {SUCC, ""};
+	return ret;
 }

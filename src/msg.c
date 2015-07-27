@@ -35,14 +35,14 @@ int msg(int fd)
 
 void protocol_stat_machine(unsigned short protocol, const void *pkg, size_t pkg_len)
 {
-	STATUS status;
+	RET ret ;
 	switch(protocol)
 	{
 		case PTO_LOGIN:
-			status = act_user_login(pkg, pkg_len);
+			ret = act_user_login(pkg, pkg_len);
 			break;
 		case PTO_MSG:
-			status = act_user_message(pkg, pkg_len);
+			ret = act_user_message(pkg, pkg_len);
 			break;
 		default:
 			break;
@@ -84,14 +84,14 @@ int msg_read(int fd, void **pkg, size_t *pkg_len)
 	if(readlen == 0)
 	{
 		remove_client(fd, 0);
-		elog("client %d was closed", fd);
+		elog(E_MSG, "client %d was closed", fd);
 		return 0;
 	}
 
 	if(readlen < 0)
 	{
 		remove_client(fd, 0);
-		elog("recv failed error num is %d", errno);
+		elog(E_MSG, "recv failed error num is %d", errno);
 		return 0;
 	}
 

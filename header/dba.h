@@ -28,33 +28,24 @@ int close_db();
 
 /**
  * 登录用户获取信息
- * @param const char *account 用户账号
- * @param const char *pwd 用户密码
- * @param struct user *_u 返回值指针
- *
- * @return struct user 用户结构
- * -1 登录账号错误
- * -2 密码错误
- * -3 数据库错误
- * 0 成功（将返回指针设为查到的用户）
- * 获取登录用户信息
+ * @param const char *where 条件
+ * @param struct user **users 用户列表
+ * @param size_t *ucount 用户数（列表长度）
+ * @return int 0/1 失败/成功; -xxx 错误
  */
 int get_users(const char *where, struct user **users, size_t *ucount);
 
 /**
  * 通过id获取用户信息
- *
  * @param int id 用户id
  * @param struct user *_u 返回值指针
- *
- * @return int 0/1 失败/成功; -1 数据库错误; 
- *
+ * @return int 0/1 失败/成功; -xxx 错误，根据DBE_xx常量获取; 
  */
 int get_user(int id, struct user *_u);
 
 /**
  * 插入聊天数据
  * @param struct message *msg 消息正文结构体
- * @return int 插入条数/-1 数据库错误/-2 插入失败
+ * @return int 插入条数/-xxx 错误
  */
 int insert_message(struct message *msg);

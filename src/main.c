@@ -44,21 +44,21 @@ int main(int argc, char *argv[]){
 
 	if( config == NULL )
 	{
-		elog("parse config faled ");
+		elog(E_ERROR, "parse config faled ");
 		exit( -1 );
 	}
 
 	flag = pthread_create(&thread_c1, NULL, thread_func, NULL);
 	if(flag != 0)
 	{
-		elog("run child thread failed error num is %d", errno);
+		elog(E_ERROR, "run child thread failed error num is %d", errno);
 		exit( -1 );
 	}
 	
 	char *_ip = chat_get_config("server.ip");
 	char *_port = chat_get_config("server.port");
 	if(_ip == NULL || _port == NULL){
-		elog("key [server_ip/server_port] not found from config");
+		elog(E_ERROR, "key [server_ip/server_port] not found from config");
 		exit( -1 );
 	}
 	
@@ -75,14 +75,14 @@ int main(int argc, char *argv[]){
 	flag = bind(serv_sock_f, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 	if(flag == -1)
 	{
-		elog("bind address failed error num is %d", errno);
+		elog(E_ERROR, "bind address failed error num is %d", errno);
 		exit( -1 );
 	}
 
 	flag = listen(serv_sock_f, 5);
 	if(flag == -1)
 	{
-		elog("listen failed error num is %d", errno);
+		elog(E_ERROR, "listen failed error num is %d", errno);
 		exit( -1 );
 	}
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]){
 	socklen_t client_sock_l = 0;
 	int client_sock_f = -1;
 
-	elog("server is running .. wait connecter ...");
+	elog(E_MSG, "server is running .. wait connecter ...");
 
 	ep_servf = epoll_create(5);
 	ep_clients_t1 = epoll_create(5);
@@ -102,7 +102,7 @@ int main(int argc, char *argv[]){
 
 	flag = epoll_ctl(ep_servf, EPOLL_CTL_ADD, serv_sock_f, &_event);
     if (flag == -1) {
-		elog("epoll_ctl failed error num is %d", errno);
+		elog(E_ERROR, "epoll_ctl failed error num is %d", errno);
         exit( -1 );
     }
 
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
 	flag = init_db();
 	if(!flag)
 	{
-		elog("init database failed !");
+		elog(E_ERROR, "init database failed !");
 		exit( -1 );
 	}
 
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]){
 			client_len = g_hash_table_size(clients);
 			if(client_len >= MAX_CLIENT)
 			{
-				elog("client pool is full max client is %d , now %d", MAX_CLIENT, client_len);
+				elog(E_WARNNING, "client pool is full max client is %d , now %d", MAX_CLIENT, client_len);
 				/* 应该通知客户端，服务器链接已满，需要排队 */
 				continue;
 			}
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]){
 			client_sock_f = accept(serv_sock_f, (struct sockaddr *)&client_addr, &client_sock_l);
 			if(client_sock_f == -1)
 			{
-				elog("accept failed error num is %d", errno);
+				elog(E_ERROR, "accept failed error num is %d", errno);
 				continue;
 			}
 
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]){
 			inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, client_info->ipv4, 16);
 			client_info->port = client_addr.sin_port;
 
-			elog("%s:%u connect", client_info->ipv4, client_info->port);
+			elog(E_MSG, "%s:%u connect", client_info->ipv4, client_info->port);
 
 			/* 添加到客户端连接表 */
 			g_hash_table_insert(clients, &(client_info->uid), (gpointer)client_info) ;
@@ -192,7 +192,7 @@ static void sig_func(int signum)
 		kill((pid_t)getpid(), (int)SIGKILL);
 		break;
 	default:
-		elog("%d signal not found"); break;
+		elog(E_WARNNING, "%d signal not found"); break;
 	}
 }
 
@@ -212,7 +212,7 @@ int remove_client(int key, int type)
 
 	if(_cinfo == NULL)
 	{
-		elog("client not found on main.c remove_client ");
+		elog(E_WARNNING, "client not found on main.c remove_client ");
 		return 0;
 	}
 
@@ -221,14 +221,14 @@ int remove_client(int key, int type)
 
 	if(flag == -1)
 	{
-		elog("epoll_ctl failed error num is %d", errno);
+		elog(E_WARNNING, "epoll_ctl failed error num is %d", errno);
 		perror("epoll_ctl");
 		ret = 0;
 	}
 	else
 	{
 		close(_cinfo->fd);
-		elog("close fd ok !");
+		elog(E_MSG, "close fd ok !");
 		ret = 1;
 	}
 
@@ -263,7 +263,7 @@ static void free_all()
 		
 		C_INFO *_info = (C_INFO *)value;
 		
-		elog("%d:%s:%u destory", *((int *)key), _info->ipv4, _info->port);
+		elog(E_MSG, "%d:%s:%u destory", *((int *)key), _info->ipv4, _info->port);
 		
 		close(_info->fd);
 		
@@ -288,7 +288,7 @@ static void free_all()
 	
 	close_db();
 
-	elog("free alloc done !");
+	elog(E_MSG, "free alloc done !");
 	
 	/* 程序结束，释放所有堆 END */	
 }

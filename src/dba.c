@@ -10,8 +10,12 @@
 #include "logicutil.h"
 #include <mysql.h>
 #include "dba.h"
+#include "dbautil.h"
+#include "chat_exception.h"
 
 MYSQL *mysql = NULL;
+
+static int instance_exist();
 
 int close_db()
 {
@@ -32,37 +36,27 @@ int init_db()
 	char *db_pwd  = chat_get_config("db.pwd");
 	char *db_name = chat_get_config("db.name");
 
-	elog("正在连接到数据库: %s:%s:%s:%s ...", db_host, db_user, db_pwd, db_name);
+	elog(E_MSG, "正在连接到数据库: %s:%s:%s:%s ...", db_host, db_user, db_pwd, db_name);
 
     mysql_real_connect(mysql, db_host, db_user, db_pwd, db_name, 0, NULL, 0);
     unsigned my_errno = mysql_errno(mysql);
     if (my_errno>0) {
-        elog("mysql 连接错误，错误代码%d", my_errno);
+        elog(E_ERROR, "mysql 连接错误，错误代码%d", my_errno);
         return 0;
     }
-	elog("mysql 连接成功");
+	elog(E_MSG, "mysql 连接成功");
 
     mysql_set_character_set(mysql, "utf8");
-    mysql_query(mysql, "set names utf8");
+    sql_query(mysql, "set names utf8");
 
     return 1;
 }
 
-int sql_query(MYSQL *mysql, const char *stmt_str)
-{
-	int _errno = mysql_query(mysql, sql);
-	if(_errno>0)
-	{
-		elog("mysql: statement syntax error: errno %d", _errno);
-	}
-	return _errno;
-}
-
-int instance_exist()
+static int instance_exist()
 {
 	if(mysql == NULL)
 	{
-		elog("mysql: instance not exist");
+		elog(E_ERROR, "mysql: instance not exist");
 		return 0;
 	}
 	return 1;
@@ -70,7 +64,7 @@ int instance_exist()
 
 int insert_message(struct message *msg)
 {
-	if(mysql == NULL){
+	if(!instance_exist()){
 		return DBE_NOINSTANCE;
 	}
 
@@ -84,7 +78,7 @@ int insert_message(struct message *msg)
 			msg->type
 			);
 
-	int flag = mysql_query(mysql, sql);
+	int flag = sql_query(mysql, sql);
 
 	if(flag>0){
 		return DBE_STATEMENT;
@@ -98,8 +92,8 @@ int insert_message(struct message *msg)
 
 int get_user(int id, struct user *_u)
 {
-	if(mysql == NULL){
-		return -1;
+	if(!instance_exist()){
+		return DBE_NOINSTANCE;
 	}
 
 	size_t _t = 200;
@@ -107,16 +101,16 @@ int get_user(int id, struct user *_u)
 
 	sprintf(sql, "select * from user where id=%d", id);
 
-	int flag = mysql_query(mysql, sql);
+	int flag = sql_query(mysql, sql);
 
 	if(flag>0){
-		return -2;
+		return DBE_STATEMENT;
 	}
 
-	MYSQL_RES *result = mysql_store_result(mysql);
+	MYSQL_RES *result = sql_store_result(mysql);
 
 	if(result == NULL){
-		return -3;
+		return DBE_RESULT;
 	}
 
 	my_ulonglong count = mysql_num_rows(result);
@@ -136,8 +130,8 @@ int get_user(int id, struct user *_u)
 }
 
 int get_users(const char *where, struct user **users, size_t *ucount){
-	if(mysql == NULL){
-		return -3;
+	if(!instance_exist()){
+		return DBE_NOINSTANCE;
 	}
 
 	size_t _t = 200 + strlen(where);
@@ -146,22 +140,23 @@ int get_users(const char *where, struct user **users, size_t *ucount){
 
 	sprintf(sql, "select * from user %s", where);
 
-	int flag = mysql_query(mysql, sql);
+	int flag = sql_query(mysql, sql);
 
 	if(flag>0){
-		return -3;
+		return DBE_STATEMENT;
 	}
 
-	MYSQL_RES *result =  mysql_store_result(mysql);
+	MYSQL_RES *result = sql_store_result(mysql);
 
-    if (result == NULL) {
-        return -3;
-    }
+	if(result == NULL){
+		return DBE_RESULT;
+	}
 
     my_ulonglong item_count = mysql_num_rows(result);
 
     if(item_count<=0){
-    	return -1;
+		*ucount = 0;
+    	return 1;
     }
 	
 	size_t user_il = sizeof(struct user);
@@ -186,5 +181,5 @@ int get_users(const char *where, struct user **users, size_t *ucount){
 	}
 	*ucount = i;
 
-	return 0;
+	return 1;
 }

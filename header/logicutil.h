@@ -1,11 +1,15 @@
-#define E_NOTICE 1
-#define E_WARNNING 1<<1
-
+/**
+ * 系统错误级别
+ */
+#define E_MSG 1
+#define E_NOTICE 1<<1
+#define E_WARNNING 1<<2
+#define E_ERROR 1<<3
 
 /**
  * 记录/显示日志
  */
-void elog(const char * , ...);
+void elog(int level, const char * , ...);
 
 /**
  * 释放变量
