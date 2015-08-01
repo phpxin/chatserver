@@ -71,20 +71,26 @@ void response(int fd, int flag, unsigned short protocol, const void *udata, size
 	void *pkg = malloc(pkg_size);
 	memset(pkg, '\0', pkg_size);
 	
-	/* void *pkg_cur = pkg */
+	void *_pkg_cur = pkg;
 
 	int _pkg_size = int_to_net(pkg_size);
-	memcpy(pkg, &_pkg_size, pkg_ll);
+	memcpy(_pkg_cur, &_pkg_size, pkg_ll);
+	_pkg_cur += pkg_ll;
 
 	unsigned short _protocol = htons(protocol) ;
-	memcpy(pkg+pkg_ll, &_protocol, pto_l);
+	memcpy(_pkg_cur, &_protocol, pto_l);
+	_pkg_cur += pto_l;
 
 	int _flag = int_to_net(flag);
-	memcpy(pkg+pkg_ll+pto_l, &_flag, flag_l);
+	memcpy(_pkg_cur, &_flag, flag_l);
+	_pkg_cur += flag_l;
 
-	memcpy(pkg+pkg_ll+pto_l+flag_l, udata, udata_len);
+	memcpy(_pkg_cur, udata, udata_len);
 
 	msg_write(fd, pkg, pkg_size);
+
+	myfree(pkg);
+	_pkg_cur = NULL;
 
 }
 
