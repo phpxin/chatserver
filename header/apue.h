@@ -26,6 +26,8 @@ typedef enum{FAILED=0, SUCC=1, ERR=-1}STATUS ;
 typedef struct{
 	STATUS status;
 	char *tip;
+	size_t udata_l;
+	void *udata;
 }RET;
 
 typedef struct {

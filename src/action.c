@@ -10,7 +10,7 @@ RET act_user_login(const void *pkg, size_t pkg_len)
 	char account[200] = {'\0'} ;
 	char pwd[200] = {'\0'} ;
 
-	RET ret={SUCC, ""};
+	RET ret={SUCC, "", 0, NULL};
 
 	size_t shift = 0, cplen = 0;
 	
@@ -37,27 +37,71 @@ RET act_user_login(const void *pkg, size_t pkg_len)
 	
 	int flag = get_users(where, &users, &ucount);
 
+	struct user _u;
+
 	if(flag<0){
 		elog(E_NOTICE, "user login failed return %d", flag);
 		ret.status = ERR;
 		ret.tip = "user account not exist";
 	}else{
 		int i;
-		struct user _u;
+		
 		size_t user_il = sizeof(struct user);
 		for( i=0; i<ucount; i++){
 			memcpy(&_u, users+i, user_il);
-			printf("account is %s, pwd is %s, name is %s \n", _u.account, _u.pwd, _u.name);
+		}
+
+		if(strncmp(_u.pwd, pwd, strlen(_u.pwd)) != 0)
+		{
+			ret.status = ERR;
+			ret.tip = "password wrong";
 		}
 	}
 
 	myfree(users);
+
+	/* response */
+	if(ret.status == SUCC){
+		ret.udata_l = sizeof(struct user);
+		ret.udata = malloc(ret.udata_l) ;
+		_u.id = int_to_net(_u.id);
+		memcpy(ret.udata, &_u, ret.udata_l);
+	}
 
 	return ret;
 }
 
 RET act_user_message(const void *pkg, size_t pkg_len)
 {
-	RET ret = {SUCC, ""};
+	RET ret = {SUCC, "", 0, NULL};
+
+	int uid = 0;
+	int fid = 0;
+	int len = 0;
+
+	size_t _k = sizeof(int) ;
+
+	memcpy(&uid, pkg, _k);
+	memcpy(&fid, pkg+_k, _k);
+	memcpy(&len, pkg+_k*2, _k);
+
+	uid = net_to_int(uid);
+	fid = net_to_int(fid);
+	len = net_to_int(len);
+
+	if(len > TEXT_SIZE_1-1){
+		ret.status = FAILED;
+		ret.tip = "message content to long, big then max";
+	}
+
+	struct message msg ;
+	msg.uid = uid;
+	msg.fid = fid;
+	
+	memset(msg.content, '\0', TEXT_SIZE_1);
+	memcpy(msg.content, pkg+_k*3, len);
+	
+	insert_message(&msg);
+
 	return ret;
 }

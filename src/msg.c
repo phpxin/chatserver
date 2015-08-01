@@ -24,18 +24,25 @@ int msg(int fd)
 	memcpy(&protocol, buf, protocol_l);
 	protocol = ntohs(protocol);
 
-	protocol_stat_machine(protocol, buf+protocol_l, buf_len-protocol_l);
+	RET sm_ret = protocol_stat_machine(protocol, buf+protocol_l, buf_len-protocol_l);
 
-	char *_testmsg = "hello world !\n";
-	msg_write(fd, (void *)_testmsg, strlen(_testmsg));
+	int flag = 0;
+
+	if(sm_ret.status == SUCC){
+		flag = 1;
+	}
+
+	response(fd, flag, protocol, sm_ret.udata, sm_ret.udata_l);
 
 	myfree(buf);
+	myfree(sm_ret.udata);
+
 	return 1;
 }
 
-void protocol_stat_machine(unsigned short protocol, const void *pkg, size_t pkg_len)
+RET protocol_stat_machine(unsigned short protocol, const void *pkg, size_t pkg_len)
 {
-	RET ret ;
+	RET ret = {SUCC, "", 0, NULL} ;
 	switch(protocol)
 	{
 		case PTO_LOGIN:
@@ -45,8 +52,40 @@ void protocol_stat_machine(unsigned short protocol, const void *pkg, size_t pkg_
 			ret = act_user_message(pkg, pkg_len);
 			break;
 		default:
+			ret.status = FAILED ;
+			ret.tip = "unknow protocol" ;
 			break;
 	}
+
+	return ret;
+}
+
+void response(int fd, int flag, unsigned short protocol, const void *udata, size_t udata_len)
+{
+	size_t pkg_ll = sizeof(int) ;
+	size_t pto_l = sizeof(unsigned short) ;
+	size_t flag_l = sizeof(int) ;
+
+	int pkg_size = pkg_ll + pto_l + flag_l + udata_len ;
+
+	void *pkg = malloc(pkg_size);
+	memset(pkg, '\0', pkg_size);
+	
+	/* void *pkg_cur = pkg */
+
+	int _pkg_size = int_to_net(pkg_size);
+	memcpy(pkg, &_pkg_size, pkg_ll);
+
+	unsigned short _protocol = htons(protocol) ;
+	memcpy(pkg+pkg_ll, &_protocol, pto_l);
+
+	int _flag = int_to_net(flag);
+	memcpy(pkg+pkg_ll+pto_l, &_flag, flag_l);
+
+	memcpy(pkg+pkg_ll+pto_l+flag_l, udata, udata_len);
+
+	msg_write(fd, pkg, pkg_size);
+
 }
 
 int msg_read(int fd, void **pkg, size_t *pkg_len)
@@ -54,7 +93,6 @@ int msg_read(int fd, void **pkg, size_t *pkg_len)
 	
 	int readlen = 0 , _rlen = 0;
 	int _lenl = BUFSIZE;
-	_lenl = 10;
 	*pkg = malloc(_lenl);
 	memset(*pkg, '\0', _lenl);
 

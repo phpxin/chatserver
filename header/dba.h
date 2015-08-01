@@ -1,16 +1,19 @@
 /* define data structs */
+#define CHAR_SIZE_1 200
+#define TEXT_SIZE_1 65535
+
 struct user{
 	int id;
-	char account[200];
-	char pwd[200];
-	char name[200];
+	char account[CHAR_SIZE_1];
+	char pwd[CHAR_SIZE_1];
+	char name[CHAR_SIZE_1];
 };
 
 struct message{
 	int id;
 	int uid;
 	int fid;
-	char content[65535];
+	char content[TEXT_SIZE_1];
 	short type;
 };
 
