@@ -4,6 +4,10 @@
 #include "protocol.h"
 #include "strutil.h"
 #include "logicutil.h"
+#include "hashutil.h"
+#include "msg.h"
+
+extern GHashTable *clients;
 
 RET act_user_login(const void *pkg, size_t pkg_len)
 {
@@ -102,6 +106,20 @@ RET act_user_message(const void *pkg, size_t pkg_len)
 	memcpy(msg.content, pkg+_k*3, len);
 	
 	insert_message(&msg);
+
+	/* retransmission */
+
+	C_INFO *_cinfo = NULL;
+	_cinfo = (C_INFO *)g_hash_table_find(clients, chat_cinfo_search_call, &msg.fid);
+
+	if(_cinfo == NULL){
+		elog(E_MSG, "对方未登录");
+	}else{
+		void *wpkg = malloc(pkg_len);
+		memcpy(wpkg, pkg, pkg_len);
+		msg_write(_cinfo->fd, PTO_MSG, &wpkg, pkg_len);
+		myfree(wpkg);
+	}
 
 	return ret;
 }

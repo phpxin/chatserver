@@ -28,6 +28,7 @@ char 200 pwd
 struct user
 
 返回值
+协议类型 5001
 int flag
 struct user 604(Byte)
 
@@ -45,6 +46,7 @@ int len 正文长度
 const char * 正文
 
 返回值
+协议类型 5002
 int flag
 
 

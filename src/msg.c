@@ -32,7 +32,7 @@ int msg(int fd)
 		flag = 1;
 	}
 
-	response(fd, flag, protocol, sm_ret.udata, sm_ret.udata_l);
+	response(fd, flag, protocol + PTO_MASK, sm_ret.udata, sm_ret.udata_l);
 
 	myfree(buf);
 	myfree(sm_ret.udata);
@@ -62,36 +62,21 @@ RET protocol_stat_machine(unsigned short protocol, const void *pkg, size_t pkg_l
 
 void response(int fd, int flag, unsigned short protocol, const void *udata, size_t udata_len)
 {
-	size_t pkg_ll = sizeof(int) ;
-	size_t pto_l = sizeof(unsigned short) ;
 	size_t flag_l = sizeof(int) ;
 
-	int pkg_size = pkg_ll + pto_l + flag_l + udata_len ;
+	int pkg_size = flag_l + udata_len ;
 
 	void *pkg = malloc(pkg_size);
 	memset(pkg, '\0', pkg_size);
 	
-	void *_pkg_cur = pkg;
-
-	int _pkg_size = int_to_net(pkg_size);
-	memcpy(_pkg_cur, &_pkg_size, pkg_ll);
-	_pkg_cur += pkg_ll;
-
-	unsigned short _protocol = htons(protocol) ;
-	memcpy(_pkg_cur, &_protocol, pto_l);
-	_pkg_cur += pto_l;
-
 	int _flag = int_to_net(flag);
-	memcpy(_pkg_cur, &_flag, flag_l);
-	_pkg_cur += flag_l;
+	memcpy(pkg, &_flag, flag_l);
 
-	memcpy(_pkg_cur, udata, udata_len);
+	memcpy(pkg+flag_l, udata, udata_len);
 
-	msg_write(fd, pkg, pkg_size);
+	msg_write(fd, protocol, &pkg, pkg_size);
 
 	myfree(pkg);
-	_pkg_cur = NULL;
-
 }
 
 int msg_read(int fd, void **pkg, size_t *pkg_len)
@@ -145,9 +130,25 @@ int msg_read(int fd, void **pkg, size_t *pkg_len)
 	return 1;
 }
 
-int msg_write(int fd, void *pkg, size_t pkg_len)
+int msg_write(int fd, unsigned short protocol, void **pkg, size_t pkg_len)
 {
-	send(fd, pkg, pkg_len, 0);
+	size_t pkg_ll = sizeof(int) ;
+	size_t pto_l = sizeof(unsigned short) ;
+
+	size_t pkg_size = pkg_ll+pto_l+pkg_len;
+
+	*pkg = realloc(*pkg, pkg_size);
+
+	memcpy(*pkg+pkg_ll+pto_l, *pkg, pkg_len);
+
+	int _pkg_size = int_to_net(pkg_size);
+	memcpy(*pkg, &_pkg_size, pkg_ll);
+
+	unsigned short _protocol = htons(protocol) ;
+	memcpy(*pkg+pkg_ll, &_protocol, pto_l);
+
+
+	send(fd, *pkg, pkg_size, 0);
 
 	return 1;
 }
