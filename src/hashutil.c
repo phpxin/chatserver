@@ -26,6 +26,18 @@ gboolean chat_cinfo_search_withfd(gpointer key, gpointer value, gpointer user_da
 	return FALSE;
 }
 
+gboolean chat_cinfo_search_withuid(gpointer key, gpointer value, gpointer user_data)
+{
+	C_INFO *_v = (C_INFO *)value;
+	int *_u = (int *)user_data;
+
+	if(_v->uid == *_u){
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 gboolean chat_cinfo_search_call(gpointer key, gpointer value, gpointer user_data)
 {
 	int *_k = (int *)key;

@@ -9,6 +9,12 @@
 
 extern GHashTable *clients;
 
+void update_user_link(int fd, int uid)
+{
+	C_INFO *_cinfo = (C_INFO *)g_hash_table_find(clients, chat_config_search_call, &fd);
+	_cinfo->uid = uid;
+}
+
 RET act_user_login(const void *pkg, size_t pkg_len)
 {
 	char account[200] = {'\0'} ;
@@ -110,13 +116,14 @@ RET act_user_message(const void *pkg, size_t pkg_len)
 	/* retransmission */
 
 	C_INFO *_cinfo = NULL;
-	_cinfo = (C_INFO *)g_hash_table_find(clients, chat_cinfo_search_call, &msg.fid);
+	_cinfo = (C_INFO *)g_hash_table_find(clients, chat_cinfo_search_withuid, &msg.fid);
 
 	if(_cinfo == NULL){
-		elog(E_MSG, "对方未登录");
+		elog(E_MSG, "对方未登录 %d", msg.fid);
 	}else{
 		void *wpkg = malloc(pkg_len);
 		memcpy(wpkg, pkg, pkg_len);
+		
 		msg_write(_cinfo->fd, PTO_MSG, &wpkg, pkg_len);
 		myfree(wpkg);
 	}

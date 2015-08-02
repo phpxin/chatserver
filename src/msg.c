@@ -5,6 +5,7 @@
 #include <errno.h>
 #include "action.h"
 #include "protocol.h"
+#include "dba.h"
 
 extern int errno ;
 
@@ -30,6 +31,13 @@ int msg(int fd)
 
 	if(sm_ret.status == SUCC){
 		flag = 1;
+
+		/* if login protocol , update user link hash table */
+		if(protocol == PTO_LOGIN)
+		{
+			int _login_uid = net_to_int( ( (struct user *)(sm_ret.udata) )->id );
+			update_user_link(fd, _login_uid);
+		}
 	}
 
 	response(fd, flag, protocol + PTO_MASK, sm_ret.udata, sm_ret.udata_l);
@@ -146,7 +154,6 @@ int msg_write(int fd, unsigned short protocol, void **pkg, size_t pkg_len)
 
 	unsigned short _protocol = htons(protocol) ;
 	memcpy(*pkg+pkg_ll, &_protocol, pto_l);
-
 
 	send(fd, *pkg, pkg_size, 0);
 

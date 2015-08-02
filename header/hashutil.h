@@ -10,3 +10,4 @@ gboolean chat_config_search_call(gpointer key, gpointer value, gpointer user_dat
  */
 gboolean chat_cinfo_search_call(gpointer key, gpointer value, gpointer user_data);
 gboolean chat_cinfo_search_withfd(gpointer key, gpointer value, gpointer user_data);
+gboolean chat_cinfo_search_withuid(gpointer key, gpointer value, gpointer user_data);

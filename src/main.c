@@ -15,7 +15,7 @@
 extern int errno ;
 
 GHashTable *config = NULL;
-GHashTable *clients = NULL;
+GHashTable *clients = NULL;	/* 以连接标识符为key */
 
 static void sig_func(int signum); /* 信号处理 */
 static void free_all(); /* 释放堆内存 */
@@ -24,8 +24,6 @@ static void *thread_func(void *udata); /* 连接线程 */
 int ep_servf = -1 , ep_clients_t1= -1 ;
 struct epoll_event *event_ok = NULL;
 struct epoll_event *ce_ok = NULL;
-
-int uid = 1; /* ______  模拟的uid */
 
 pthread_t thread_c1;
 
@@ -140,8 +138,7 @@ int main(int argc, char *argv[]){
 
 			client_info = (C_INFO *)calloc(1, sizeof(C_INFO));
 
-			client_info->uid = uid;
-			uid++;
+			client_info->uid = 0;
 			client_info->fd = client_sock_f;
 			inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, client_info->ipv4, 16);
 			client_info->port = client_addr.sin_port;
@@ -149,7 +146,7 @@ int main(int argc, char *argv[]){
 			elog(E_MSG, "%s:%u connect", client_info->ipv4, client_info->port);
 
 			/* 添加到客户端连接表 */
-			g_hash_table_insert(clients, &(client_info->uid), (gpointer)client_info) ;
+			g_hash_table_insert(clients, &(client_info->fd), (gpointer)client_info) ;
 
 			/* 添加到客户端epoll */
 			_event.data.fd = client_sock_f;
@@ -203,7 +200,7 @@ int remove_client(int key, int type)
 
 	if(type == 1)
 	{
-		_cinfo = (C_INFO *)g_hash_table_find(clients, chat_cinfo_search_call, &key);
+		_cinfo = (C_INFO *)g_hash_table_find(clients, chat_cinfo_search_withuid, &key);
 	}
 	else
 	{
@@ -232,7 +229,7 @@ int remove_client(int key, int type)
 		ret = 1;
 	}
 
-	g_hash_table_remove(clients, &_cinfo->uid);
+	g_hash_table_remove(clients, &_cinfo->fd);
 
 	myfree(_cinfo);
 
