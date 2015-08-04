@@ -4,3 +4,4 @@
  */
 RET act_user_login(const void *pkg, size_t pkg_len);
 RET act_user_message(const void *pkg, size_t pkg_len);
+void update_user_link(int fd, int uid);
