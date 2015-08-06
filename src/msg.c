@@ -143,17 +143,24 @@ int msg_write(int fd, unsigned short protocol, void **pkg, size_t pkg_len)
 	size_t pkg_ll = sizeof(int) ;
 	size_t pto_l = sizeof(unsigned short) ;
 
+	void *tempmem = calloc(pkg_len, sizeof(void));
+	memcpy(tempmem, *pkg, pkg_len);
+
 	size_t pkg_size = pkg_ll+pto_l+pkg_len;
 
 	*pkg = realloc(*pkg, pkg_size);
+	memset(*pkg, '\0', pkg_len);
 
-	memcpy(*pkg+pkg_ll+pto_l, *pkg, pkg_len);
+	
 
 	int _pkg_size = int_to_net(pkg_size);
 	memcpy(*pkg, &_pkg_size, pkg_ll);
 
 	unsigned short _protocol = htons(protocol) ;
 	memcpy(*pkg+pkg_ll, &_protocol, pto_l);
+	
+	memcpy(*pkg+pkg_ll+pto_l, tempmem, pkg_len);
+	myfree(tempmem);
 
 	send(fd, *pkg, pkg_size, 0);
 
