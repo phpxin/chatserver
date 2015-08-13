@@ -102,6 +102,7 @@ RET act_user_message(const void *pkg, size_t pkg_len)
 	if(len > TEXT_SIZE_1-1){
 		ret.status = FAILED;
 		ret.tip = "message content to long, big then max";
+        return ret;
 	}
 
 	struct message msg ;

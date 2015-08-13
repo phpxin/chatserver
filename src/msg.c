@@ -39,7 +39,7 @@ int msg(int fd)
 			update_user_link(fd, _login_uid);
 		}
 	}
-
+    
 	response(fd, flag, protocol + PTO_MASK, sm_ret.udata, sm_ret.udata_l);
 
 	myfree(buf);
@@ -132,9 +132,17 @@ int msg_read(int fd, void **pkg, size_t *pkg_len)
 		return 0;
 	}
 
+    /* 去掉包长度字段 */
 	*pkg_len = readlen - pkg_ll;
-	memcpy(*pkg, *pkg+pkg_ll, *pkg_len);
+
+    void *tempmem = calloc(*pkg_len, sizeof(void));
+    memcpy(tempmem, *pkg+pkg_ll, *pkg_len);
+
+    memset(*pkg, '\0', readlen);
+	memcpy(*pkg, tempmem, *pkg_len);
 	
+    myfree(tempmem);
+
 	return 1;
 }
 
