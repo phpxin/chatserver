@@ -18,13 +18,13 @@ define('CACHE_HOST','');
 define('CACHE_PORT',0);
 
 //数据库配置
-define('DB_HOST','127.0.0.1') ;
+define('DB_HOST','chatdb') ;
 define('DB_USER','root') ;
 define('DB_PWD','lixinxin') ;
-define('DB_NAME','test') ;
+define('DB_NAME','cchat') ;
 define('DB_CHARSET','utf8') ;
 define('DB_PREFIX','') ;
-define('DB_CACHE_FOLDER','/tmp/db_cache') ;
+define('DB_CACHE_FOLDER','/var/log/cchat/db_cache') ;
 
 //错误日志
 define('LOG_ERROR',FALSE);

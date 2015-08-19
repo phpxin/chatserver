@@ -35,15 +35,18 @@ class pdo_mysql extends PDO {
 		$this->tableName=$this->prefix.strtolower((empty($tableName)?substr(get_class($this), 0, -5):$tableName));
         $this->cacheFolder=rtrim(DB_CACHE_FOLDER,'/').'/';
 
-        if( !file_exists($this->cacheFolder) || !(mkdir($this->cacheFolder, 0777, true)) ) {
+        if( !file_exists($this->cacheFolder) && !(mkdir($this->cacheFolder, 0777, true)) ) {
             throw new Exception('无法创建数据库字段缓存文件夹，或没有权限');
         }
 		
 		//尝试连接数据库
 		$this->dsn = 'mysql:host='.$this->host.';dbname='.$this->db;
 
+		//echo $this->dsn, $this->user, $this->pwd;
+
 		try{
 			parent::__construct($this->dsn, $this->user, $this->pwd);
+
 		}catch(PDOException $e){
 			
 			throw new SQLException('pdo 数据库连接失败');
