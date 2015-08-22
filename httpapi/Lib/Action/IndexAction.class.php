@@ -10,15 +10,7 @@ class IndexAction extends Action
 	public function index()
 	{
 		
-		$list = M('user')->select();
-
-		if( empty($list) )
-		{
-			$list = array();
-		}
-	
-		echo json_encode($list);
-		
+		echo 'hello world';
 	}
 
 }

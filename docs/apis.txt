@@ -1,0 +1,2 @@
+获取用户列表
+http://{server ip address}:8080/index.php?module=user&action=getList
