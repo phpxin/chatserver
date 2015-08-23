@@ -49,7 +49,7 @@ class pdo_mysql extends PDO {
 
 		}catch(PDOException $e){
 			
-			throw new SQLException('pdo 数据库连接失败');
+			throw new SQLException('pdo 数据库连接失败 ' . $e->getMessage() );
 			
 		}
 		
