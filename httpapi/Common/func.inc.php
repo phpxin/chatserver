@@ -16,6 +16,24 @@ function importORGClass($str){
 	include 'Lib/ORG/'.ltrim($str,'/') ;
 }
 
+function getAvatarFullPath($filename)
+{
+	return 'http://'.$_SERVER["HTTP_HOST"].'/uploads/'.$filename;
+}
+
+/**
+ * @param int $ret 1/2 成功/失败
+ * @param array $data 消息数组，失败时data.msg 为错误信息/ecode为错误代码
+ */
+function jsonReturn($ret, $data){
+	$arr = array(
+		'ret'=>intval($ret), 
+		'data'=>$data
+	);
+
+	return json_encode($arr);
+}
+	
 /**
  * 自动加载类
  * @param string $s 类名

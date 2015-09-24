@@ -7,6 +7,7 @@ struct user{
 	char account[CHAR_SIZE_1];
 	char pwd[CHAR_SIZE_1];
 	char name[CHAR_SIZE_1];
+	char avatar[CHAR_SIZE_1];
 };
 
 struct message{

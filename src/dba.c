@@ -16,6 +16,7 @@
 MYSQL *mysql = NULL;
 
 static int instance_exist();
+static int getAvatarFull(char *avatar);
 
 int close_db()
 {
@@ -59,6 +60,18 @@ static int instance_exist()
 		elog(E_ERROR, "mysql: instance not exist");
 		return 0;
 	}
+	return 1;
+}
+static int getAvatarFull(char *avatar){
+	char *_ip = chat_get_config("server.ip");
+	char *_webport = "8080";
+	char _avatar[200];
+	const char *format = "http://%s:%s/uploads/%s" ;
+
+	/* size_t fbufsize = strlen(_ip) + strlen(_webport) + _strlen(format) + strlen(avatar) + 20; */
+	memcpy(_avatar, avatar, strlen(avatar)+1);
+	sprintf(avatar, format, _ip, _webport, _avatar);
+
 	return 1;
 }
 
@@ -125,6 +138,9 @@ int get_user(int id, struct user *_u)
 	strncpy(_u->account, row[1], sizeof(_u->account));
 	strncpy(_u->pwd, row[2], sizeof(_u->pwd));
 	strncpy(_u->name, row[3], sizeof(_u->name));
+	strncpy(_u->avatar, row[4], sizeof(_u->avatar));
+	getAvatarFull( _u->avatar );
+
 
 	return 1;
 }
@@ -174,6 +190,8 @@ int get_users(const char *where, struct user **users, size_t *ucount){
 		strncpy(_u.account, row[1], sizeof(_u.account)-1);
 		strncpy(_u.pwd, row[2], sizeof(_u.pwd)-1);
 		strncpy(_u.name, row[3], sizeof(_u.name)-1);
+		strncpy(_u.avatar, row[4], sizeof(_u.avatar)-1);
+		getAvatarFull( _u.avatar );	
 		
 		memcpy(*users+i, &_u, user_il);
 
