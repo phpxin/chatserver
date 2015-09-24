@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: 2015-08-19 15:06:21
+-- Generation Time: 2015-09-24 17:31:22
 -- 服务器版本： 5.5.34
 -- PHP Version: 5.6.9
 
@@ -44,7 +44,8 @@ CREATE TABLE IF NOT EXISTS `user` (
   `id` int(11) NOT NULL,
   `account` varchar(200) NOT NULL DEFAULT '',
   `pwd` varchar(200) NOT NULL DEFAULT '',
-  `name` varchar(200) NOT NULL DEFAULT ''
+  `name` varchar(200) NOT NULL DEFAULT '',
+  `avatar` varchar(200) NOT NULL DEFAULT '' COMMENT '用户头像'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
