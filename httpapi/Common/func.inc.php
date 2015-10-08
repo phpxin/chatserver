@@ -18,7 +18,7 @@ function importORGClass($str){
 
 function getAvatarFullPath($filename)
 {
-	return 'http://'.$_SERVER["HTTP_HOST"].'/uploads/'.$filename;
+	return 'http://'.$_SERVER["HTTP_HOST"].'/uploads/'.$filename.'?'.time();
 }
 
 /**
