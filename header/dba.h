@@ -1,3 +1,5 @@
+#include <time.h>
+
 /* define data structs */
 #define CHAR_SIZE_1 200
 #define TEXT_SIZE_1 65535
@@ -16,6 +18,7 @@ struct message{
 	int fid;
 	char content[TEXT_SIZE_1];
 	short type;
+    time_t addtime;
 };
 
 /*

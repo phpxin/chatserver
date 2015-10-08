@@ -6,6 +6,7 @@
 #include "logicutil.h"
 #include "hashutil.h"
 #include "msg.h"
+#include <time.h>
 
 extern GHashTable *clients;
 
@@ -108,6 +109,7 @@ RET act_user_message(const void *pkg, size_t pkg_len)
 	struct message msg ;
 	msg.uid = uid;
 	msg.fid = fid;
+    msg.addtime = time(0);
 	
 	memset(msg.content, '\0', TEXT_SIZE_1);
 	memcpy(msg.content, pkg+_k*3, len);

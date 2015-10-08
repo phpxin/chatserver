@@ -84,11 +84,12 @@ int insert_message(struct message *msg)
 	size_t _t = sizeof(struct message)+200;
 	char sql[_t];
 
-	sprintf(sql, "insert into message(uid, fid, content, type) values(%d, %d, '%s', %d)",
+	sprintf(sql, "insert into message(uid, fid, content, type, addtime) values(%d, %d, '%s', %d, %ld)",
 			msg->uid,
 			msg->fid,
 			msg->content,
-			msg->type
+			msg->type,
+            msg->addtime
 			);
 
 	int flag = sql_query(mysql, sql);
