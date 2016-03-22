@@ -37,7 +37,7 @@ int main(int argc, char *argv[]){
 	int flag = 0;
 
 	(void)signal(SIGINT, sig_func) ;
-	
+
 	chat_parse_config(argv[1]);
 
 	if( config == NULL )
@@ -52,16 +52,16 @@ int main(int argc, char *argv[]){
 		elog(E_ERROR, "run child thread failed error num is %d", errno);
 		exit( -1 );
 	}
-	
+
 	char *_ip = chat_get_config("server.ip");
 	char *_port = chat_get_config("server.port");
 	if(_ip == NULL || _port == NULL){
 		elog(E_ERROR, "key [server_ip/server_port] not found from config");
 		exit( -1 );
 	}
-	
+
 	unsigned short port = atoi(_port);
-	
+
     struct sockaddr_in serv_addr;
 	int serv_sock_f = socket(AF_INET, SOCK_STREAM, 0);
 	/* ioctl(serv_sock_f, FIONBIO, 1); */
@@ -69,7 +69,17 @@ int main(int argc, char *argv[]){
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(port);
 	inet_pton( AF_INET, _ip, &serv_addr.sin_addr.s_addr);
-	
+
+	/* SO_REUSEADDR 设置端口重用，否则中断程序重启会提示端口被使用，需要过一段时间才能使用 */
+	flag = 1;
+	int len=sizeof(int);
+    if( setsockopt(serv_sock_f, SOL_SOCKET, SO_REUSEADDR, &flag, len) == -1)
+    {
+       /* perror("setsockopt"); */
+	   elog(E_ERROR, "setsockopt reuse addr failed error num is %d", errno);
+       exit( -1 );
+    }
+
 	flag = bind(serv_sock_f, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 	if(flag == -1)
 	{
@@ -84,7 +94,7 @@ int main(int argc, char *argv[]){
 		exit( -1 );
 	}
 
-	
+
     struct sockaddr_in client_addr;
 	socklen_t client_sock_l = 0;
 	int client_sock_f = -1;
@@ -154,7 +164,7 @@ int main(int argc, char *argv[]){
 			epoll_ctl(ep_clients_t1, EPOLL_CTL_ADD, client_sock_f, &_event);
 		}
 	}
-	
+
 	exit( EXIT_SUCCESS );
 }
 
@@ -253,23 +263,23 @@ static void free_all()
 
 	/* myfree(config); */
 
-	
+
 	g_hash_table_iter_init (&iter, clients);
 	while (g_hash_table_iter_next (&iter, &key, &value))
   	{
-		
+
 		C_INFO *_info = (C_INFO *)value;
-		
+
 		elog(E_MSG, "%d:%s:%u destory", *((int *)key), _info->ipv4, _info->port);
-		
+
 		close(_info->fd);
-		
+
 		myfree(value);
-		
+
   	}
 
 	/* myfree(clients); */
-	
+
 	if(ep_servf != -1)
 	{
 		close(ep_servf);
@@ -282,10 +292,10 @@ static void free_all()
 
 	myfree(event_ok);
 	myfree(ce_ok);
-	
+
 	close_db();
 
 	elog(E_MSG, "free alloc done !");
-	
-	/* 程序结束，释放所有堆 END */	
+
+	/* 程序结束，释放所有堆 END */
 }

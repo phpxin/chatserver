@@ -11,7 +11,7 @@ header('content-type:text/html; charset=utf-8');
 
 //其他配置
 define('DS', DIRECTORY_SEPARATOR);//系统分隔符
-define('URL_MODE',1); //url模式 0 代表普通 1代表pathinfo 
+define('URL_MODE',1); //url模式 0 代表普通 1代表pathinfo
 
 //缓存配置（如果不使用缓存不需要配置）
 define('CACHE_HOST','');
@@ -19,8 +19,8 @@ define('CACHE_PORT',0);
 
 //数据库配置
 define('DB_HOST','chatdb') ;
-define('DB_USER','root') ;
-define('DB_PWD','lixinxin') ;
+define('DB_USER','dber') ;
+define('DB_PWD','lixxxx18*)lslscp') ;
 define('DB_NAME','cchat') ;
 define('DB_CHARSET','utf8') ;
 define('DB_PREFIX','') ;
