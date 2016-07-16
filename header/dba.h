@@ -46,7 +46,7 @@ int get_users(const char *where, struct user **users, size_t *ucount);
  * 通过id获取用户信息
  * @param int id 用户id
  * @param struct user *_u 返回值指针
- * @return int 0/1 失败/成功; -xxx 错误，根据DBE_xx常量获取; 
+ * @return int 0/1 失败/成功; -xxx 错误，根据DBE_xx常量获取;
  */
 int get_user(int id, struct user *_u);
 

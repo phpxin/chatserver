@@ -3,3 +3,6 @@
 bin/chatserver
 core
 httpapi/uploads
+.cproject
+.project
+.settings
