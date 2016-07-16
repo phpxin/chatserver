@@ -35,6 +35,7 @@ typedef struct {
 	int fd;
 	char ipv4[32];
 	unsigned short port;
+	struct event *eventFp; /* event 描述符，用来在断开连接时删除事件 */
 } C_INFO; /* 客户端连接信息 */
 
 /**

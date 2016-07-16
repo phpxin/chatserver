@@ -5,9 +5,11 @@
 #include "logicutil.h"
 #include <errno.h>
 #include "net.h"
-#include <sys/epoll.h>
+
 #include "msg.h"
 #include "dba.h"
+
+#include <event.h>
 
 #define MAX_CLIENT 512	/* 最大客户端连接数 */
 #define MAX_EFDS 1024	/* epoll 最大支持的描述符数量 */
@@ -19,13 +21,15 @@ GHashTable *clients = NULL;	/* 以连接标识符为key */
 
 static void sig_func(int signum); /* 信号处理 */
 static void free_all(); /* 释放堆内存 */
-static void *thread_func(void *udata); /* 连接线程 */
 
-int ep_servf = -1 , ep_clients_t1= -1 ;
-struct epoll_event *event_ok = NULL;
-struct epoll_event *ce_ok = NULL;
 
-pthread_t thread_c1;
+/*static void *thread_func(void *udata);  连接线程 */
+/*pthread_t thread_c1;*/
+
+struct event_base* client_ebase;
+
+void onRead(int iCliFd, short iEvent, void *arg);
+void onAccept(int serv, short iEvent, void *arg);
 
 int main(int argc, char *argv[]){
 
@@ -46,12 +50,14 @@ int main(int argc, char *argv[]){
 		exit( -1 );
 	}
 
+	/*
 	flag = pthread_create(&thread_c1, NULL, thread_func, NULL);
 	if(flag != 0)
 	{
 		elog(E_ERROR, "run child thread failed error num is %d", errno);
 		exit( -1 );
 	}
+	*/
 
 	char *_ip = chat_get_config("server.ip");
 	char *_port = chat_get_config("server.port");
@@ -64,7 +70,7 @@ int main(int argc, char *argv[]){
 
     struct sockaddr_in serv_addr;
 	int serv_sock_f = socket(AF_INET, SOCK_STREAM, 0);
-	/* ioctl(serv_sock_f, FIONBIO, 1); */
+
 
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(port);
@@ -75,7 +81,7 @@ int main(int argc, char *argv[]){
 	int len=sizeof(int);
     if( setsockopt(serv_sock_f, SOL_SOCKET, SO_REUSEADDR, &flag, len) == -1)
     {
-       /* perror("setsockopt"); */
+
 	   elog(E_ERROR, "setsockopt reuse addr failed error num is %d", errno);
        exit( -1 );
     }
@@ -94,30 +100,8 @@ int main(int argc, char *argv[]){
 		exit( -1 );
 	}
 
-
-    struct sockaddr_in client_addr;
-	socklen_t client_sock_l = 0;
-	int client_sock_f = -1;
-
-	elog(E_MSG, "server is running .. wait connecter ...");
-
-	ep_servf = epoll_create(5);
-	ep_clients_t1 = epoll_create(5);
-
-	struct epoll_event _event;
-	_event.data.fd = serv_sock_f;
-    _event.events = EPOLLIN ;
-
-	flag = epoll_ctl(ep_servf, EPOLL_CTL_ADD, serv_sock_f, &_event);
-    if (flag == -1) {
-		elog(E_ERROR, "epoll_ctl failed error num is %d", errno);
-        exit( -1 );
-    }
-
-	event_ok = (struct epoll_event *)calloc( 1, sizeof(struct epoll_event));
-	C_INFO *client_info = NULL;
 	clients = g_hash_table_new(g_direct_hash, g_int_equal);
-	size_t client_len = 0;
+
 
 	flag = init_db();
 	if(!flag)
@@ -126,51 +110,27 @@ int main(int argc, char *argv[]){
 		exit( -1 );
 	}
 
+	client_ebase = event_base_new();  /* 创建一个 event 的描述符 */
+
+	/* 连接注册为新事件 (EV_PERSIST为事件触发后不默认删除) */
+	struct event *pEvRead = (struct event *)malloc(sizeof(struct event));
+	event_set(pEvRead, serv_sock_f, EV_READ|EV_PERSIST, onAccept, NULL);
+	event_base_set(client_ebase, pEvRead);
+	event_add(pEvRead, NULL);
+	event_base_dispatch(client_ebase); /* 开始事件循环 */
+
 	while(1)
 	{
-        int isok=epoll_wait(ep_servf, event_ok, 1, -1) ;
-        if(isok>0 && event_ok[0].data.fd == serv_sock_f)
-        {
-			client_len = g_hash_table_size(clients);
-			if(client_len >= MAX_CLIENT)
-			{
-				elog(E_WARNNING, "client pool is full max client is %d , now %d", MAX_CLIENT, client_len);
-				/* 应该通知客户端，服务器链接已满，需要排队 */
-				continue;
-			}
 
-			client_sock_f = accept(serv_sock_f, (struct sockaddr *)&client_addr, &client_sock_l);
-			if(client_sock_f == -1)
-			{
-				elog(E_ERROR, "accept failed error num is %d", errno);
-				continue;
-			}
-
-			client_info = (C_INFO *)calloc(1, sizeof(C_INFO));
-
-			client_info->uid = 0;
-			client_info->fd = client_sock_f;
-			inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, client_info->ipv4, 16);
-			client_info->port = client_addr.sin_port;
-
-			elog(E_MSG, "%s:%u connect", client_info->ipv4, client_info->port);
-
-			/* 添加到客户端连接表 */
-			g_hash_table_insert(clients, &(client_info->fd), (gpointer)client_info) ;
-
-			/* 添加到客户端epoll */
-			_event.data.fd = client_sock_f;
-    		_event.events = EPOLLIN | EPOLLOUT ;
-			epoll_ctl(ep_clients_t1, EPOLL_CTL_ADD, client_sock_f, &_event);
-		}
 	}
 
 	exit( EXIT_SUCCESS );
 }
 
+/*
 static void *thread_func(void *udata)
 {
-	/* 扩展多线程注意：这里应该是每个线程管理不同的epoll，避免并发加锁造成拥塞，影响程序效率 */
+	 扩展多线程注意：这里应该是每个线程管理不同的epoll，避免并发加锁造成拥塞，影响程序效率
 	ce_ok = (struct epoll_event *)calloc( MAX_EFDS, sizeof(struct epoll_event));
 	int i = 0;
 	while(1)
@@ -188,7 +148,7 @@ static void *thread_func(void *udata)
 
 	pthread_exit( NULL );
 }
-
+*/
 
 static void sig_func(int signum)
 {
@@ -224,12 +184,11 @@ int remove_client(int key, int type)
 	}
 
 
-	flag = epoll_ctl(ep_clients_t1, EPOLL_CTL_DEL, _cinfo->fd, NULL);
-
+	flag = event_del(_cinfo->eventFp); /* 连接结束调用 */
 	if(flag == -1)
 	{
-		elog(E_WARNNING, "epoll_ctl failed error num is %d", errno);
-		perror("epoll_ctl");
+		elog(E_WARNNING, "event_del failed error num is %d", errno);
+		perror("event_del");
 		ret = 0;
 	}
 	else
@@ -239,12 +198,68 @@ int remove_client(int key, int type)
 		ret = 1;
 	}
 
+
 	g_hash_table_remove(clients, &_cinfo->fd);
 
 	myfree(_cinfo);
 
 	return ret;
 }
+
+void onAccept(int serv_sock_f, short iEvent, void *arg)
+{
+
+	struct sockaddr_in client_addr;
+	socklen_t client_sock_l = 0;
+	int client_sock_f = -1;
+
+	elog(E_MSG, "server is running .. wait connecter ...");
+	ssize_t client_len = 0;
+	client_len = g_hash_table_size(clients);
+	if(client_len >= MAX_CLIENT)
+	{
+		elog(E_WARNNING, "client pool is full max client is %d , now %d", MAX_CLIENT, client_len);
+		/* 应该通知客户端，服务器链接已满，需要排队 */
+
+	}
+
+	client_sock_f = accept(serv_sock_f, (struct sockaddr *)&client_addr, &client_sock_l);
+	if(client_sock_f == -1)
+	{
+		elog(E_ERROR, "accept failed error num is %d", errno);
+
+	}
+	C_INFO *client_info = NULL;
+	client_info = (C_INFO *)calloc(1, sizeof(C_INFO));
+
+	client_info->uid = 0;
+	client_info->fd = client_sock_f;
+	inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, client_info->ipv4, 16);
+	client_info->port = client_addr.sin_port;
+
+	elog(E_MSG, "%s:%u connect", client_info->ipv4, client_info->port);
+
+
+	/* 连接注册为新事件 (EV_PERSIST为事件触发后不默认删除) */
+	struct event *pEvRead = (struct event *)malloc(sizeof(struct event));
+	event_set(pEvRead, client_sock_f, EV_READ|EV_PERSIST, onRead, pEvRead);
+	event_base_set(client_ebase, pEvRead);
+	event_add(pEvRead, NULL);
+
+	client_info->eventFp = pEvRead;
+
+	/* 添加到客户端连接表 */
+	g_hash_table_insert(clients, &(client_info->fd), (gpointer)client_info) ;
+}
+
+
+
+void onRead(int client, short iEvent, void *arg)
+{
+
+	msg(client);
+}
+
 
 static void free_all()
 {
@@ -280,18 +295,6 @@ static void free_all()
 
 	/* myfree(clients); */
 
-	if(ep_servf != -1)
-	{
-		close(ep_servf);
-	}
-
-	if(ep_clients_t1 != -1)
-	{
-		close(ep_clients_t1);
-	}
-
-	myfree(event_ok);
-	myfree(ce_ok);
 
 	close_db();
 
