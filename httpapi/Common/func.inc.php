@@ -31,6 +31,7 @@ function jsonReturn($ret, $data){
 		'data'=>$data
 	);
 
+	//header('Content-Type: application/json');
 	return json_encode($arr);
 }
 	
