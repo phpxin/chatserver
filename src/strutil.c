@@ -1,4 +1,5 @@
 #include "apue.h"
+#include "logicutil.h"
 #include <strutil.h>
 
 int su_cfpos(char *arr, char c)

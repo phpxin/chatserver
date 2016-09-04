@@ -1,4 +1,5 @@
 #include "apue.h"
+#include "logicutil.h"
 #include <glib.h>
 #include "hashutil.h"
 

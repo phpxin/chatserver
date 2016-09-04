@@ -106,7 +106,8 @@ int msg_read(int fd, void **pkg, size_t *pkg_len)
 		if(!package_len){
 			memcpy(&package_len, *pkg, pkg_ll);
 			package_len = net_to_int(package_len);
-			printf("package len is %d \n", package_len);
+			/*printf("package len is %d \n", package_len);*/
+			elog(E_MSG, "package len is %d \n", package_len);
 		}
 
 		if(_rlen >= _lenl && readlen < package_len){

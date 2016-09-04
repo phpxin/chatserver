@@ -32,7 +32,8 @@ RET act_user_login(const void *pkg, size_t pkg_len)
 	cplen = 200 ;
 	memcpy(pwd, pkg+shift, cplen);
 
-	printf("account is %s, pwd is %s \n", account, pwd);
+	/*printf("account is %s, pwd is %s \n", account, pwd);*/
+	elog(E_ERROR, "account is %s, pwd is %s \n", account, pwd);
 
 	su_trim(account, "\r\n ");
 	su_trim(pwd, "\r\n ");

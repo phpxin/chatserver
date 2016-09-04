@@ -16,7 +16,8 @@ void p_chat_exception(int _eno)
 		default : emsg = "none exception" ; break;
 	}
 
-	printf("%s\n", emsg);
+	/*printf("%s\n", emsg);*/
+	elog(E_ERROR, "%s\n", emsg);
 }
 
 void set_chat_exception(int level, int _eno)

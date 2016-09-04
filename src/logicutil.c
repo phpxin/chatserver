@@ -1,15 +1,37 @@
 #include "apue.h"
 #include "stdarg.h"
+#include "config.h"
 #include "logicutil.h"
 
 void elog(int level, const char *format , ...)
 {
-	va_list argp;
-	fprintf(stdout, "dump:");
-	va_start(argp, format);
-	vfprintf(stdout, format, argp);
-	va_end(argp);
-	fprintf(stdout, "\n");
+	FILE *fp = stdout ;
+	
+	if(!MODE_DEBUG){
+		char *filepath = chat_get_config("server.log.path") ;
+		FILE *fp = fopen(filepath, "a+");
+		if(fp==NULL){
+			printf("write log falied, %s file falied\n", filepath);
+			return ;
+		}
+		
+		va_list argp;
+		fprintf(fp, "dump:");
+		va_start(argp, format);
+		vfprintf(fp, format, argp);
+		va_end(argp);
+		fprintf(fp, "\n");
+		fclose(fp);
+	}else{
+		va_list argp;
+		fprintf(fp, "dump:");
+		va_start(argp, format);
+		vfprintf(fp, format, argp);
+		va_end(argp);
+		fprintf(fp, "\n");
+	}
+	
+	
 }
 
 int bl_or_ll(){

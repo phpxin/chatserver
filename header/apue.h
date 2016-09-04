@@ -16,6 +16,8 @@
 
 #define BUFSIZE 1024
 
+#define MODE_DEBUG 0
+
 /**
  * 三个值表示的状态应该不同
  * FAILED 表示失败
