@@ -9,8 +9,10 @@ class UserAction extends Action
 	
 	public function getlist()
 	{
+		$uid = intval( $GLOBALS['safePostParam']['uid'] );
+		file_put_contents('/tmp/php.debug', var_export($uid, true));
 		
-		$list = M('user')->field('id,name,avatar')->select();
+		$list = M('user')->field('id,name,avatar')->where("id!=".$uid)->select();
 		$data = array(
 			'msg' => '暂无好友' ,
 			'ecode' => 5001
