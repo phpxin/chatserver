@@ -6,7 +6,27 @@
  */
 class UserAction extends Action 
 {
-	
+
+	public function login(){
+
+		$inputs = ApiTools::getRequestParams() ;
+
+		$account = $inputs['account'] ;
+		$pwd = $inputs['pwd'] ;
+
+
+		$authcode = ApiLoginLogic::login($account, $pwd) ;
+
+		if (!$authcode){
+			ApiTools::error(ApiTools::CODE_ERR_USER, "用户名或密码错误") ;
+		}
+
+		ApiTools::success(['authcode'=>$authcode]) ;
+	}
+
+	/**
+	 * 查询好友列表
+	 */
 	public function getlist()
 	{
 		$inputs = ApiTools::getRequestParams();
@@ -34,6 +54,10 @@ class UserAction extends Action
 
 	}
 
+	/**
+	 * 查询用户详细信息
+	 *
+	 */
 	public function getInfo()
 	{
 		$inputs = ApiTools::getRequestParams();

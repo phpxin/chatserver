@@ -21,8 +21,8 @@ define('STORAGE', dirname(__FILE__).'/../storage');
 
 //数据库配置
 define('DB_HOST','chatdb') ;
-define('DB_USER','dber') ;
-define('DB_PWD','lixxxx18*)lslscp') ;
+define('DB_USER','dev') ;
+define('DB_PWD','JINEG928391^#^!@()') ;
 define('DB_NAME','cchat') ;
 define('DB_CHARSET','utf8') ;
 define('DB_PREFIX','') ;
