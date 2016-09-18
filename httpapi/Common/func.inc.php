@@ -5,6 +5,10 @@
  * @version  
  */
 
+function storage_path(){
+	return STORAGE ;
+}
+
 function dump($obj){
 	echo '<pre>';
 	var_dump($obj);
@@ -93,6 +97,7 @@ function M($table){
 function U($module='index',$action='Index',$_params=array()){
 	$module=strtolower($module);
 	$action=ucfirst(strtolower($action));
+	$paramStr = '' ;
 	if(!empty($_params)){
 		foreach($_params as $key=>$val){
 			$paramStr.=$key.'/'.$val.'/';

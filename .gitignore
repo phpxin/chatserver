@@ -2,8 +2,9 @@
 *.swp
 bin/chatserver
 core
-httpapi/uploads
+
 .cproject
 .project
 .settings
 .DS_Store
+.idea

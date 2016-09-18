@@ -9,14 +9,13 @@ class UserAction extends Action
 	
 	public function getlist()
 	{
-		$uid = intval( $GLOBALS['safePostParam']['uid'] );
-		file_put_contents('/tmp/php.debug', var_export($uid, true));
+		$inputs = ApiTools::getRequestParams();
+
+		$uid = intval( $inputs['uid'] );
+		LogUtil::inst()->write(LogUtil::DEBUG, 'debug info', ['uid'=>$uid]) ;
 		
 		$list = M('user')->field('id,name,avatar')->where("id!=".$uid)->select();
-		$data = array(
-			'msg' => '暂无好友' ,
-			'ecode' => 5001
-		);
+
 	
 		if( !empty($list) )
 		{
@@ -24,29 +23,36 @@ class UserAction extends Action
 				$v['avatar'] = getAvatarFullPath($v['avatar']) ;
 			}
 			$data = array( 'userlist' => $list );
+			
+			ApiTools::success($data) ;
+			
+		}else{
+			
+			ApiTools::error(ApiTools::CODE_ERR_NOT_FOUND, "暂无好友") ;
+			
 		}
 
-		
-		echo jsonReturn(1, $data);
 	}
 
 	public function getInfo()
 	{
-		$data = array(
-			'msg' => '未找到用户' ,
-			'ecode' => 5001
-		);
+		$inputs = ApiTools::getRequestParams();
 
-		$uid = intval( $GLOBALS['safeGetParam']['uid'] );
-		//file_put_contents('/tmp/php.debug', var_export($uid, true) );
+		$uid = intval( $inputs['uid'] );
+
 		$info = M('user')->where('id='.$uid)->field('id,name,avatar')->find();
 
 		if(!empty($info)){
 			$info['avatar'] = getAvatarFullPath($info['avatar']) ;
 			$data = array('info' => $info );
+
+			ApiTools::success($data) ;
+		}else{
+			ApiTools::error(ApiTools::CODE_ERR_NOT_FOUND, "找不到该用户") ;
 		}
-		echo jsonReturn(1, $data);
+
 	}
+
 	
 }
 

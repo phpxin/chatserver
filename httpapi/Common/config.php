@@ -17,6 +17,8 @@ define('URL_MODE',1); //url模式 0 代表普通 1代表pathinfo
 define('CACHE_HOST','');
 define('CACHE_PORT',0);
 
+define('STORAGE', dirname(__FILE__).'/../storage');
+
 //数据库配置
 define('DB_HOST','chatdb') ;
 define('DB_USER','dber') ;
@@ -24,15 +26,15 @@ define('DB_PWD','lixxxx18*)lslscp') ;
 define('DB_NAME','cchat') ;
 define('DB_CHARSET','utf8') ;
 define('DB_PREFIX','') ;
-define('DB_CACHE_FOLDER','/var/log/cchat/db_cache') ;
+define('DB_CACHE_FOLDER',STORAGE.'/db_cache') ;
 
 //错误日志
 define('LOG_ERROR',FALSE);
-define('LOG_ERROR_PATH','/var/log/cchat');
+define('LOG_ERROR_PATH',STORAGE.'/log/errors');
 
 //异常日志
 define('LOG_EXCEPTION', false);
-define('LOG_EXCEPTION_PATH','/var/log/cchat');
+define('LOG_EXCEPTION_PATH',STORAGE.'/log/exceptions');
 
 //环境变量 (最后不要加分隔符)
 define('__ROOT__','');
