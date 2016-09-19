@@ -1,8 +1,6 @@
 *.o
 *.swp
 bin/chatserver
-core
-
 .cproject
 .project
 .settings
