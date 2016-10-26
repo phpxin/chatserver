@@ -6,6 +6,7 @@
 #include "logicutil.h"
 #include "hashutil.h"
 #include "msg.h"
+#include "crypt.h"
 #include <time.h>
 
 extern GHashTable *clients;
@@ -18,31 +19,46 @@ void update_user_link(int fd, int uid)
 
 RET act_user_login(const void *pkg, size_t pkg_len)
 {
+	/*
 	char account[200] = {'\0'} ;
 	char pwd[200] = {'\0'} ;
+	*/
+	unsigned char authcode[1024] = {'\0'};
 
 	RET ret={SUCC, "", 0, NULL};
 
 	size_t shift = 0, cplen = 0;
 	
+	/*
 	cplen = 200 ;
 	memcpy(account, pkg+shift, cplen);
 
 	shift += cplen ;
 	cplen = 200 ;
 	memcpy(pwd, pkg+shift, cplen);
+	*/
+
+	cplen = 1024 ;
+	memcpy(authcode, pkg+shift, cplen);
 
 	/*printf("account is %s, pwd is %s \n", account, pwd);*/
-	elog(E_ERROR, "account is %s, pwd is %s \n", account, pwd);
+	/*elog(E_ERROR, "account is %s, pwd is %s \n", account, pwd);*/
 
-	su_trim(account, "\r\n ");
-	su_trim(pwd, "\r\n ");
+	/*su_trim(account, "\r\n ");
+	su_trim(pwd, "\r\n ");*/
 
-	char *format = "where account='%s'\0";
-	size_t wlen = strlen(format) + strlen(account) + 2;
+	su_trim(authcode, "\r\n ");
+
+	AuthCode *ac = authcode_de(authcode) ;
+
+	/*char *format = "where account='%s'\0";*/
+	char *format = "where id='%d'\0";
+	/*size_t wlen = strlen(format) + strlen(account) + 2;*/
+	size_t wlen = strlen(format) + 20;
 
 	char where[wlen];
-	sprintf(where, format, account) ;
+	/*sprintf(where, format, account) ;*/
+	sprintf(where, format, ac->uid) ;
 
 	struct user *users = NULL;
 	size_t ucount = 0;
@@ -63,11 +79,13 @@ RET act_user_login(const void *pkg, size_t pkg_len)
 			memcpy(&_u, users+i, user_il);
 		}
 
+		/*
 		if(strncmp(_u.pwd, pwd, strlen(_u.pwd)) != 0)
 		{
 			ret.status = ERR;
 			ret.tip = "password wrong";
 		}
+		*/
 	}
 
 	myfree(users);

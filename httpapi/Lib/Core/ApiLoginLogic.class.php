@@ -2,11 +2,9 @@
 
 class ApiLoginLogic{
 
-    private static $authKey = '#3b*&#D129Ac)28s' ;
-    private static $authIv = '#3b*&#D129Ac)28s' ;
+    private static $authKey = '0123456789abcdeF' ;
+    private static $authIv = '1234567887654321' ;
 
-
-    private static $flag = 'chat' ; // authcode标识符
     private static $timeLimit = 86400 ; // 登录失效时间，暂定一小时
 
 
@@ -17,9 +15,9 @@ class ApiLoginLogic{
             return false;
         }
 
-        $staff_id = $info['id'];
+        $uid = $info['id'];
 
-        $auth = self::getAuthCode($staff_id) ;
+        $auth = self::getAuthCode($uid) ;
 
         return $auth ;
     }
@@ -37,32 +35,26 @@ class ApiLoginLogic{
 
         $data = explode('_', $data) ;
 
-        if (count($data) < 3) {
-            return false;
-        }
-
-        $authcode_flag = $data[0] ;
-
-        if ($authcode_flag != self::$flag){
+        if (count($data) < 2) {
             return false;
         }
 
 
-        $ret['uid'] = $data[1] ;
-        $ret['lose_time'] = $data[2] ;
+        $ret['uid'] = $data[0] ;
+        $ret['lose_time'] = $data[1] ;
 
 
         return $ret ;
     }
 
-    public static function getAuthCode($staff_id){
+    public static function getAuthCode($uid){
 
         $td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
         mcrypt_generic_init($td, self::$authKey, self::$authIv);
 
         $lose_time = time() + self::$timeLimit;
 
-        $_authstr = self::$flag.'_'.$staff_id.'_'.$lose_time ;
+        $_authstr = $uid.'_'.$lose_time ;
 
 
         $blockSize = mcrypt_enc_get_block_size($td);

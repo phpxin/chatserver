@@ -10,10 +10,10 @@
 
 class TestAction extends Action {
     
-    
+    // http://192.168.2.93:8080/index.php?module=test&action=loginTest
     public function loginTest(){
 
-        $host = '192.168.2.108:8080' ;
+        $host = '192.168.2.93:8080' ;
         $input['account'] = 'lx' ;
         $input['pwd'] = '123' ;
         $url ='http://'.$host.'/index.php?module=user&action=login' ;

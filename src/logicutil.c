@@ -3,6 +3,7 @@
 #include "config.h"
 #include "logicutil.h"
 
+
 void elog(int level, const char *format , ...)
 {
 	FILE *fp = stdout ;
