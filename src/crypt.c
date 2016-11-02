@@ -34,7 +34,7 @@ AuthCode* authcode_de(unsigned char *in)
             return NULL ;
         }
 
-        AuthCode *ac = (AuthCode *)malloc(1) ;
+        AuthCode *ac = (AuthCode *)malloc(sizeof(AuthCode)) ;
         ac->uid = atoi(arr[0]) ;
         ac->unixtime = atoi(arr[1]) ;
 
