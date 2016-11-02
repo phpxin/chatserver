@@ -10,6 +10,8 @@ class UserAction extends Action
 	public function login(){
 
 		$inputs = ApiTools::getRequestParams() ;
+		LogUtil::inst()->write(LogUtil::DEBUG, 'debug info', ['inputs'=>$inputs]) ;
+
 
 		$account = $inputs['account'] ;
 		$pwd = $inputs['pwd'] ;

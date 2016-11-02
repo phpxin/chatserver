@@ -100,7 +100,7 @@ class ApiTools{
 
     private static function _toJson($ret, $encode){
 
-        echo json_encode($ret) ;
+        echo json_encode($ret, JSON_UNESCAPED_UNICODE) ;
         exit();
 
         //return response()->json($ret);
