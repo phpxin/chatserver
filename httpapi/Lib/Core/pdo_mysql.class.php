@@ -212,6 +212,7 @@ class pdo_mysql extends PDO {
 		foreach($f as $v){
 			$sets[]="$v='$data[$v]'";
 		}
+		
 		$sets=implode(',', $sets);
 		
 		$sql="update $this->tableName set $sets $this->_where $this->_order $this->_limit";

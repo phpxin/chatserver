@@ -8,15 +8,49 @@
  */
 
 
-class TestAction extends Action {
+class TestAction {
     
-    // http://192.168.2.93:8080/index.php?module=test&action=loginTest
-    public function loginTest(){
+    // http://192.168.2.93:8080/index.php?module=test&action=userTest
+    public function userTest(){
 
-        $host = '192.168.2.94:8080' ;
-        $input['account'] = 'lx' ;
-        $input['pwd'] = '123' ;
-        $url ='http://'.$host.'/index.php?module=user&action=login' ;
+        $host = '192.168.0.105:8080' ;
+        $input = [] ;
+        $url = '' ;
+
+        $type = 'dealInvite' ;
+        //$input['authcode'] = 'inJAWUEGK2z6q8+DrIKfWA==' ; uid=1
+        $input['authcode'] = '3VpuZPyb0I7XGDWRyUSaAA==' ; //uid = 2
+
+        switch ($type) {
+            case 'login' :
+                $input['account'] = 'dd' ;
+                $input['pwd'] = '123' ;
+                $url ='http://'.$host.'/index.php?module=user&action=login' ;
+                break;
+            case 'register' :
+                $input['account'] = 'lx1' ;
+                $input['pwd'] = '123' ;
+                $input['repwd'] = '123' ;
+                $url ='http://'.$host.'/index.php?module=user&action=register' ;
+                break;
+            case 'search' :
+                $input['keywords'] = 'x' ;
+                $url = 'http://'.$host.'/index.php?module=user&action=search' ;
+                break;
+            case 'invite' :
+                $input['fid'] = 2;
+                $input['intro'] = '123444444' ;
+                $url = 'http://'.$host.'/index.php?module=relation&action=invite' ;
+                break;
+            case 'dealInvite' :
+                $input['id'] = 2 ;
+                $input['agree'] = 1 ;
+                $url = 'http://'.$host.'/index.php?module=relation&action=dealInvite' ;
+                break;
+            default:
+                echo 'no action ' ;
+                exit();
+        }
 
         $req = curl_init($url) ;
 
@@ -27,6 +61,7 @@ class TestAction extends Action {
 
         $reqRet = curl_exec($req) ;
 
+
         if (curl_errno($req)){
             echo curl_error($req) ;
             exit();
@@ -34,7 +69,12 @@ class TestAction extends Action {
 
         $data = json_decode($reqRet, true) ;
 
-        dump($data) ;
+        if (empty($data)) {
+            dump($reqRet) ;
+        }else{
+            dump($data) ;
+        }
+
     }
     
 }

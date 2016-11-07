@@ -5,6 +5,7 @@ class ApiTools{
     const CODE_SUCCESS = 0 ;
 
     // 10 段：公用异常
+    const CODE_MSG = 10000 ; //标准错误
     const CODE_ERR_LOGIN = 10001 ; //登录异常
     const CODE_ERR_LOST_AUTHCODE = 250;//缺少用户验证码
     const CODE_ERR_USER = 10002;//用户异常

@@ -7,6 +7,51 @@
 class UserAction extends Action 
 {
 
+	/**
+	 * 注册接口
+	 */
+	public function register()
+	{
+		$inputs = ApiTools::getRequestParams() ;
+		
+		$account = $inputs['account'] ;
+		$pwd = $inputs['pwd'] ;
+		$repwd = $inputs['repwd'] ;
+
+
+		if ($pwd != $repwd) {
+			ApiTools::error(ApiTools::CODE_ERR_USER, "两次密码输入不一致") ;
+		}
+
+		$table = M('user') ;
+		$table->execute("begin transaction") ;
+
+		try{
+			$info = $table->query("select * from user where account='{$account}' for update") ;
+			if ($info) {
+				throw new Exception('用户已经注册') ;
+			}
+
+			$save['account'] = $account ;
+			$save['pwd'] = $pwd ;
+			$save['name'] = $account ;
+			$save['avatar'] = 'default.jpg' ;
+
+			$table->add($save) ;
+
+			$table->execute("commit") ;
+
+		}catch(Exception $e){
+			$table->execute("rollback") ;
+			ApiTools::error(ApiTools::CODE_ERR_USER, $e->getMessage()) ;
+		}
+
+		ApiTools::success(['msg'=>'ok']) ;
+	}
+
+	/**
+	 * 登录
+	 */
 	public function login(){
 
 		$inputs = ApiTools::getRequestParams() ;
@@ -26,14 +71,44 @@ class UserAction extends Action
 		ApiTools::success(['authcode'=>$authcode]) ;
 	}
 
+    /**
+     * 搜索用户
+     */
+    public function search(){
+        $uid = $this->uid ;
+
+        //var_dump($this->userInfo) ;
+
+        $inputs = ApiTools::getRequestParams() ;
+        $keywords = $inputs['keywords'] ;
+
+        $list = M('user')->field('id,name,avatar')->where("name like '%$keywords%'")->select();
+
+
+
+        if( !empty($list) )
+        {
+            foreach($list as &$v){
+                $v['avatar'] = getAvatarFullPath($v['avatar']) ;
+            }
+            $data = array( 'userlist' => $list );
+
+            ApiTools::success($data) ;
+
+        }else{
+
+            ApiTools::error(ApiTools::CODE_ERR_NOT_FOUND, "找不到相关用户") ;
+
+        }
+    }
+
 	/**
 	 * 查询好友列表
 	 */
 	public function getlist()
 	{
-		$inputs = ApiTools::getRequestParams();
 
-		$uid = intval( $inputs['uid'] );
+		$uid = $this->uid;
 		LogUtil::inst()->write(LogUtil::DEBUG, 'debug info', ['uid'=>$uid]) ;
 		
 		$list = M('user')->field('id,name,avatar')->where("id!=".$uid)->select();

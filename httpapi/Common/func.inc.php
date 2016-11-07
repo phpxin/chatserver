@@ -76,6 +76,7 @@ function safeStr($s){
 /**
  * 获取数据库连接实例
  * @param string $table 表名
+ * @return pdo_mysql 
  */
 function M($table){
 	static $dbMaster ;	//定义一个在函数执行后不会释放的静态变量， 存放数据库类实例化的容器
