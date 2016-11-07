@@ -110,8 +110,16 @@ class UserAction extends Action
 
 		$uid = $this->uid;
 		LogUtil::inst()->write(LogUtil::DEBUG, 'debug info', ['uid'=>$uid]) ;
+
+		$relation = M('relation')->where('uid='.$uid)->select() ;
+
+        if (empty($relation)) {
+            ApiTools::error(ApiTools::CODE_ERR_NOT_FOUND, "暂无好友") ;
+        }
+
+        $rids = array_column($relation, 'fid') ;
 		
-		$list = M('user')->field('id,name,avatar')->where("id!=".$uid)->select();
+		$list = M('user')->field('id,name,avatar')->where("id in ('".implode("','", $rids)."')")->select();
 
 	
 		if( !empty($list) )

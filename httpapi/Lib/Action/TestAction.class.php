@@ -10,14 +10,14 @@
 
 class TestAction {
     
-    // http://192.168.2.93:8080/index.php?module=test&action=userTest
+    // http://192.168.0.105:8080/index.php?module=test&action=userTest
     public function userTest(){
 
         $host = '192.168.0.105:8080' ;
         $input = [] ;
         $url = '' ;
 
-        $type = 'dealInvite' ;
+        $type = 'getList' ;
         //$input['authcode'] = 'inJAWUEGK2z6q8+DrIKfWA==' ; uid=1
         $input['authcode'] = '3VpuZPyb0I7XGDWRyUSaAA==' ; //uid = 2
 
@@ -46,6 +46,9 @@ class TestAction {
                 $input['id'] = 2 ;
                 $input['agree'] = 1 ;
                 $url = 'http://'.$host.'/index.php?module=relation&action=dealInvite' ;
+                break;
+            case 'getList':
+                $url = 'http://'.$host.'/index.php?module=user&action=getList' ;
                 break;
             default:
                 echo 'no action ' ;
