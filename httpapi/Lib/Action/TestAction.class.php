@@ -10,16 +10,16 @@
 
 class TestAction {
     
-    // http://192.168.0.105:8080/index.php?module=test&action=userTest
+    // http://192.168.2.105:8080/index.php?module=test&action=userTest
     public function userTest(){
 
-        $host = '192.168.0.105:8080' ;
+        $host = '192.168.2.105:8080' ;
         $input = [] ;
         $url = '' ;
 
         $type = 'getList' ;
-        //$input['authcode'] = 'inJAWUEGK2z6q8+DrIKfWA==' ; uid=1
-        $input['authcode'] = '3VpuZPyb0I7XGDWRyUSaAA==' ; //uid = 2
+        $input['authcode'] = 'inJAWUEGK2z6q8+DrIKfWA==' ; //uid=1
+        //$input['authcode'] = '9YFPZ7einYAYWsA4kdyYRQ==' ; //uid = 2
 
         switch ($type) {
             case 'login' :
@@ -63,6 +63,7 @@ class TestAction {
         curl_setopt($req, CURLOPT_POSTFIELDS, $input);
 
         $reqRet = curl_exec($req) ;
+        var_dump($reqRet);
 
 
         if (curl_errno($req)){
