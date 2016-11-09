@@ -17,8 +17,8 @@ class TestAction {
         $input = [] ;
         $url = '' ;
 
-        $type = 'getList' ;
-        $input['authcode'] = 'inJAWUEGK2z6q8+DrIKfWA==' ; //uid=1
+        $type = 'search' ;
+        $input['authcode'] = 'JwzW23yeorc1zuyKb9Ly8A==' ; //uid=1
         //$input['authcode'] = '9YFPZ7einYAYWsA4kdyYRQ==' ; //uid = 2
 
         switch ($type) {
@@ -49,6 +49,10 @@ class TestAction {
                 break;
             case 'getList':
                 $url = 'http://'.$host.'/index.php?module=user&action=getList' ;
+                break;
+            case 'getInfo':
+                $input['uid'] = 3 ;
+                $url = 'http://'.$host.'/index.php?module=user&action=getInfo' ;
                 break;
             default:
                 echo 'no action ' ;

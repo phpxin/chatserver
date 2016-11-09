@@ -147,7 +147,14 @@ class UserAction extends Action
 	{
 		$inputs = ApiTools::getRequestParams();
 
-		$uid = intval( $inputs['uid'] );
+		//
+		//
+        $uid = intval( $inputs['uid'] );
+        //$uid = $this->uid ;
+        
+        if (!$uid) {
+            ApiTools::error(ApiTools::CODE_ERR_NOT_FOUND, "找不到该用户") ;
+        }
 
 		$info = M('user')->where('id='.$uid)->field('id,name,avatar')->find();
 

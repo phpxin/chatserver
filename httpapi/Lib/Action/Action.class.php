@@ -16,6 +16,7 @@ class Action{
 
         $skipLogin = [
             'user:login' ,
+            'user:register' ,
         ] ; // 可以跳过用户验证的程序
 
         $route = strtolower($GLOBALS['safeGetParam']['module'].':'.$GLOBALS['safeGetParam']['action']) ;
