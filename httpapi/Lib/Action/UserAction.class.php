@@ -53,6 +53,7 @@ class UserAction extends Action
 	 * 登录
 	 */
 	public function login(){
+		
 
 		$inputs = ApiTools::getRequestParams() ;
 		LogUtil::inst()->write(LogUtil::DEBUG, 'debug info', ['inputs'=>$inputs]) ;

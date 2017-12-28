@@ -97,6 +97,10 @@ class pdo_mysql extends PDO {
 	public function query($sql){
 		$this->sql=$sql;
 		$statement=parent::query($sql);
+		if(!$statement){
+			syslog(LOG_ERR, "query sql failed ".$sql);
+			return false;
+		}
 		$result=$statement->fetchAll(PDO::FETCH_ASSOC);
 		if(!empty($result))	return $result;
 		else return false;
