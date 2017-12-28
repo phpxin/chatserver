@@ -113,6 +113,7 @@ class UserAction extends Action
 		LogUtil::inst()->write(LogUtil::DEBUG, 'debug info', ['uid'=>$uid]) ;
 
 		$relation = M('relation')->where('uid='.$uid)->select() ;
+		
 
         if (empty($relation)) {
             ApiTools::error(ApiTools::CODE_ERR_NOT_FOUND, "暂无好友") ;
