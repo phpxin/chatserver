@@ -1,7 +1,8 @@
 all: chatserver
 
 CC = gcc
-CFLAGS = -g -Wall -ansi -D_REENTRANT
+#CFLAGS = -g -Wall -ansi -D_REENTRANT
+CFLAGS = -g -Wall -std=c99 -D_REENTRANT
 
 GLIBDIR = /usr/local/glib/
 MYSQLDIR = /usr/local/mysql/
