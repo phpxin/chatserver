@@ -10,6 +10,50 @@
 
 class RelationAction extends Action{
 
+    public function inviteList(){
+
+        //$input = ApiTools::getRequestParams() ;
+        $where = [
+            'to_uid='.$this->uid ,
+            'status='.InviteModel::STATUS_DOING ,
+        ] ;
+        $inviteList = M('invite')->where($where)->select() ;
+
+        if (empty($inviteList)) {
+            ApiTools::error(ApiTools::CODE_DATA_EMPTY, '暂无申请') ;
+        }
+
+        $_uids = array_column($inviteList, 'uid') ;
+        $_users = M('user')->where("id in('".implode("','", $_uids)."')")->select() ;
+
+        $users = [] ;
+        foreach ($_users as $_u) {
+            $users[$_u['id']] = $_u ;
+        }
+
+        $data = [] ;
+        foreach ($inviteList as $item) {
+
+            if (!isset($users[$item['uid']])) {
+                continue ;
+            }
+
+            $_user = $users[$item['uid']] ;
+
+            $data[] = [
+                'id' => $item['id'] ,
+                'uid' => $item['uid'] ,
+                'intro' => $item['intro'] ,
+                'name' => $_user['name'] ,
+                'avatar' => getAvatarFullPath($_user['avatar']) ,
+                'userIntro' => $_user['intro'] ,
+                'gender' => $_user['gender']
+            ] ;
+        }
+
+        ApiTools::success(['list'=>$data]) ;
+    }
+
     public function dealInvite() {
 
         $input = ApiTools::getRequestParams();

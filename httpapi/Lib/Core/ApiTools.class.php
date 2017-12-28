@@ -10,6 +10,7 @@ class ApiTools{
     const CODE_ERR_LOST_AUTHCODE = 250;//缺少用户验证码
     const CODE_ERR_USER = 10002;//用户异常
     const CODE_ERR_INVALID = 10003;//登录失效
+    const CODE_DATA_EMPTY = 10004 ; // 空数据
 
     // 20 段：逻辑异常
     const CODE_ERR_LACK_FIELD = 20001;//缺少关键字段

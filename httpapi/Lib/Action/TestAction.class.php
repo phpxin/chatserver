@@ -10,20 +10,20 @@
 
 class TestAction {
     
-    // http://192.168.2.105:8080/index.php?module=test&action=userTest
+    // http://192.168.2.98:8080/index.php?module=test&action=userTest
     public function userTest(){
 
-        $host = '192.168.2.105:8080' ;
+        $host = '192.168.2.98:8080' ;
         $input = [] ;
         $url = '' ;
 
-        $type = 'search' ;
-        $input['authcode'] = 'JwzW23yeorc1zuyKb9Ly8A==' ; //uid=1
+        $type = 'inviteList' ;
+        $input['authcode'] = '/ZBR8ooB8Qo9jjPCP86zpw==' ; //uid=1
         //$input['authcode'] = '9YFPZ7einYAYWsA4kdyYRQ==' ; //uid = 2
 
         switch ($type) {
             case 'login' :
-                $input['account'] = 'dd' ;
+                $input['account'] = 'lx1' ;
                 $input['pwd'] = '123' ;
                 $url ='http://'.$host.'/index.php?module=user&action=login' ;
                 break;
@@ -53,6 +53,9 @@ class TestAction {
             case 'getInfo':
                 $input['uid'] = 3 ;
                 $url = 'http://'.$host.'/index.php?module=user&action=getInfo' ;
+                break;
+            case 'inviteList' :
+                $url = 'http://'.$host.'/index.php?module=relation&action=inviteList' ;
                 break;
             default:
                 echo 'no action ' ;
